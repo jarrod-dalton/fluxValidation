@@ -47,7 +47,3 @@ This is v0.0.2: contracts first, metrics later.
 
 If \code{death_date} and/or \code{last_contact_date} are provided as always-defined variables, they are used to derive \code{alive_mask} (TRUE/FALSE/NA) and \code{followup_defined} (TRUE/FALSE) on the grid.
 }
-\item{model_defined}{Optional named list of logical matrices \code{[n_patients x n_times]} keyed by variable name, indicating when a variable is in-scope/meaningful on the grid. Defaults to all TRUE.}
-
-\item{at_risk}{Optional named list of logical matrices \code{[n_patients x (n_times-1)]} keyed by event type, indicating when patients are at-risk for event occurrence in each interval. Defaults to all TRUE for observed events.}
-

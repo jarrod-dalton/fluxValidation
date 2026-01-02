@@ -32,7 +32,7 @@ library(patientSimValidation)
 df_static <- data.frame(
   patient_id = c(1, 2),
   sex = c("F", "M"),
-  race_eth = c("White", "Black")
+  height_cm = c(165, 175)
 )
 
 df_bp <- data.frame(
