@@ -1,75 +1,82 @@
 # patientSimValidation
 
-**Validation utilities for the patientSim ecosystem.**
+Validation utilities for the **patientSim** ecosystem.
 
-`patientSimValidation` provides mask-aware, grid-aligned validation tools for comparing
-**simulated outputs** from `patientSimForecast` to **observed / test-set patient data**.
-It is designed to work alongside:
+This package focuses on one job: **make observed/test-set patient data plug-compatible with `patientSimForecast` outputs** so you can compute validation metrics on an apples-to-apples basis.
 
-- patientSimCore (state, schema, semantics)
-- patientSimForecast (summaries and estimands)
-- disease models (e.g., patientSimASCVD)
-- orchestration layers (multi-model timelines)
+## Core ideas
 
-This package is intentionally **read-only** with respect to simulation outputs:
-it never mutates objects created by `patientSimForecast`.
+- **Forecast grid is the truth**: validation evaluates only at the `times=` grid used for forecasting.
+- **Denominators come from masks, not `NA`**:
+  - `alive_mask` (TRUE/FALSE/NA)
+  - `followup_defined` (TRUE/FALSE)
+  - `model_defined` (TRUE/FALSE) for variable/event in-scope periods
+  - `measured` (TRUE/FALSE) for EHR cadence
+- **Observed state values are gridded by default with LOCF-within-window** (configurable).
 
----
+## Installation (development)
 
-## Design principles
+```r
+# install.packages("remotes")
+remotes::install_github("jarrod-dalton/patientSimValidation")
+```
 
-### 1. Apples-to-apples validation
-Validation is only meaningful when **observed quantities and simulated estimates are
-computed under the same estimand**.
+## Quick start
 
-Key implications:
-- Validation operates **only on the forecast evaluation grid** (`times=`).
-- Event risks can be evaluated under:
-  - **policy / fixed-cohort** estimands (default, matches `forecast::risk()`), or
-  - **interval risk-set** estimands (optional).
-- Denominators are defined by **explicit masks**, not by the presence or absence of data.
+### 1) Build an observed grid
 
----
+```r
+library(patientSimValidation)
 
-### 2. Masks define denominators (never NA values)
+# Example: static + longitudinal panels
+df_static <- data.frame(
+  patient_id = c(1, 2),
+  sex = c("F", "M"),
+  race_eth = c("White", "Black")
+)
 
-All validation denominators are functions of explicit masks:
+df_bp <- data.frame(
+  patient_id = c(1, 1, 2),
+  time = c(0, 6, 3),
+  sbp = c(120, 128, 140),
+  dbp = c(80,  82,  90)
+)
 
-- `alive_mask[k,i]`  
-  `TRUE`, `FALSE`, or `NA` (biological death vs follow-up stop)
+# Optional events table
+df_events <- data.frame(
+  patient_id = c(1, 2),
+  event_time = c(5, 7),
+  event_type = c("mi", "mi")
+)
 
-- `followup_defined[k,i]`  
-  Whether observation is possible at time `k`
+obs <- build_obs_grid(
+  vars = list(df_static, df_bp),
+  events = df_events,
+  times = c(0, 3, 6, 9),
+  t0 = 0,
+  start_time = 0,
+  default_window = 3
+)
+```
 
-- `model_defined[v,k,i]`  
-  Whether variable `v` is structurally meaningful at time `k`
-  (e.g., model active, episode in scope)
+### 2) Event risk validation (apples-to-apples with `patientSimForecast::risk()`)
 
-- `measured[v,k,i]`  
-  Whether the variable was observable / measured in that interval
+```r
+# pred can be a ps_risk object (preferred) or a ps_forecast object
+# result <- validate_event_risk(pred, obs, event = "mi", obs_mode = "policy")
+```
 
-NA values in state matrices **never** define denominators.
+### 3) State validation
 
----
+- Use `validate_state_prob()` for binary/categorical/ordinal variables when you have predicted level probabilities.
+- Use `validate_state_point()` for numeric variables when you have predicted means (or point summaries).
 
-### 3. Schema-driven typing
-Validation logic branches on **schema types declared in patientSimCore**:
-- binary
-- categorical
-- ordinal
-- numeric / integer / count
+## Documentation
 
-This allows validation to:
-- respect variable levels and ordering
-- apply appropriate scoring rules
-- avoid ad-hoc coercion
+Rendered vignettes (if you build docs) live under `docs/`:
+- observed grids + masks
+- event risk apples-to-apples estimands
 
----
+## License
 
-### 4. Lightweight summary inputs preferred
-Whenever possible, validation should operate on **summary objects** rather than full
-simulation outputs:
-
-- `ps_risk` for event probabilities
-- probability summaries for categorical states
-- point / quantile summaries for conti
+Proprietary.
