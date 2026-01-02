@@ -1,0 +1,18 @@
+Package: patientSimValidation
+Type: Package
+Title: Validation tools for patientSim simulations
+Version: 1.1.0
+Authors@R: person("Jarrod", "Dalton", role = c("aut", "cre"))
+Description: Tools to align observed patient data to patientSim forecast grids and compute validation metrics.
+License: Proprietary
+Encoding: UTF-8
+LazyData: true
+Imports:
+    stats,
+    utils
+Suggests:
+    testthat,
+    patientSimForecast,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

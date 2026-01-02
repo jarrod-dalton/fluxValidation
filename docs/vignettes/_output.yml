@@ -1,0 +1,7 @@
+html_document:
+  toc: true
+  toc_depth: 3
+  number_sections: false
+  theme: null
+  highlight: tango
+  css: "../docs/patientSimDocs.css"
