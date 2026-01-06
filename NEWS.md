@@ -1,3 +1,7 @@
+## 1.2.0
+
+- Version bump to align with patientSim ecosystem v1.2.0. No functional changes.
+
 # 1.1.1 (2026-01-06)
 
 - Documentation and formatting cleanup in build_obs_grid (removed legacy version references).
