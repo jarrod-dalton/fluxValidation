@@ -1,5 +1,5 @@
 
-# Hand-written docs (no roxygen). Minimal v0.0.1 contracts.
+# Hand-written docs (no roxygen).
 
 build_obs_grid <- function(
   vars,
@@ -19,7 +19,7 @@ build_obs_grid <- function(
   model_defined = NULL,
   at_risk = NULL
 )
- {
+{
   .assert(is.list(vars) && length(vars) >= 1, "`vars` must be a non-empty list of data.frames.")
   times <- as.numeric(times)
   if (any(!is.finite(times))) stop("`times` must be finite numeric.", call. = FALSE)

@@ -1,3 +1,7 @@
+# 1.1.1 (2026-01-06)
+
+- Documentation and formatting cleanup in build_obs_grid (removed legacy version references).
+
 # patientSimValidation NEWS
 
 ## 1.1.0
