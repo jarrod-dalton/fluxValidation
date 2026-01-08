@@ -12,6 +12,7 @@ build_obs_grid(
   times,
   t0,
   start_time = 0,
+  ctx = NULL,
   time_unit = NULL,
   id_col = "patient_id",
   time_col = "time",
@@ -33,7 +34,9 @@ build_obs_grid(
 
 \item{start_time}{Numeric offset applied to \code{times} before adding to \code{t0}.}
 
-\item{time_unit}{Required when \code{t0} is Date/POSIXct. Supported: days, hours, minutes, seconds.}
+\item{ctx}{Optional context list. If provided, calendar time (Date/POSIXct) inputs are converted to numeric model time using \code{ctx$time$unit} (required) and optional \code{ctx$time$origin} / \code{ctx$time$zone}.}
+
+\item{time_unit}{Legacy unit string used when \code{ctx} is not provided. Prefer specifying \code{ctx$time$unit}.}
 
 \item{id_col}{Patient id column name.}
 \item{time_col}{Time column name for vars tables.}

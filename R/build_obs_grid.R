@@ -7,6 +7,7 @@ build_obs_grid <- function(
   times,
   t0,
   start_time = 0,
+  ctx = NULL,
   time_unit = NULL,
   schema = NULL,
   default_window = 0,
@@ -26,7 +27,18 @@ build_obs_grid <- function(
   if (is.unsorted(times, strictly = FALSE)) stop("`times` must be non-decreasing.", call. = FALSE)
   if (!is.numeric(start_time) || length(start_time) != 1L) stop("`start_time` must be scalar numeric.", call. = FALSE)
 
-  parsed <- .parse_vars_tables(vars, id_col = id_col, time_col = time_col)
+  # Compile time mapping spec once (fast path for repeated conversions).
+  # If calendar times are used (Date/POSIXct), you must supply either:
+  #   - ctx with ctx$time$unit (and optional ctx$time$origin/zone), or
+  #   - time_unit (legacy arg) which will be wrapped into ctx$time$unit.
+  time_spec <- NULL
+  if (!is.null(ctx)) {
+    time_spec <- patientSimCore::ps_time_spec(ctx)
+  } else if (!is.null(time_unit) && nzchar(time_unit)) {
+    time_spec <- patientSimCore::ps_time_spec(list(time = list(unit = time_unit)))
+  }
+
+  parsed <- .parse_vars_tables(vars, id_col = id_col, time_col = time_col, time_spec = time_spec)
   patient_ids <- parsed$patient_ids
   if (length(patient_ids) == 0) stop("No patients found in `vars`.", call. = FALSE)
 
@@ -34,15 +46,12 @@ build_obs_grid <- function(
 
   grid_kind <- .time_kind(t0_vec[[1]])
   if (grid_kind %in% c("Date", "POSIXct")) {
-    if (is.null(time_unit) || !nzchar(time_unit)) {
-      stop("`time_unit` is required when t0 is Date/POSIXct (calendar time).", call. = FALSE)
+    if (is.null(time_spec)) {
+      stop("For Date/POSIXct `t0`, supply `ctx` with ctx$time$unit (and optional ctx$time$origin/zone) or provide `time_unit`.", call. = FALSE)
     }
-    .assert(time_unit %in% c("days","hours","minutes","seconds"),
-            "`time_unit` must be one of: days, hours, minutes, seconds.")
   }
 
-  grid_time <- .build_grid_time(t0_vec, times = times, start_time = start_time, time_unit = time_unit)
-
+  grid_time <- .build_grid_time(t0_vec, times = times, start_time = start_time, time_spec = time_spec)
   # Stage 2: LOCF-within-window default for gridding observed state.
   # Backward compat: measure_lookback is retained but overridden by default_window/window.
   if (!is.null(window) || !missing(default_window)) {
@@ -58,18 +67,6 @@ build_obs_grid <- function(
     window = window
   )
 
-  # For POSIXct grids, grid_time is in seconds. Interpret window widths in the
-  # units specified by time_unit (same as the offsets passed to forecast).
-  if (grid_kind == "POSIXct") {
-    mult <- switch(time_unit,
-      seconds = 1,
-      minutes = 60,
-      hours = 3600,
-      days = 86400,
-      stop("Unsupported time_unit.", call. = FALSE)
-    )
-    lookback_by_var <- lookback_by_var * mult
-  }
 
   grid_state <- .grid_state_locf(parsed, grid_time, times, lookback_by_var = lookback_by_var)
   measured <- grid_state$measured
@@ -81,7 +78,8 @@ build_obs_grid <- function(
     ev <- .summarize_events(events, patient_ids, grid_time,
                             event_time_col = event_time_col,
                             event_type_col = event_type_col,
-                            id_col = id_col)
+                            id_col = id_col,
+                            time_spec = time_spec)
   }
 
   
@@ -114,7 +112,7 @@ obj <- list(
     patient_ids = patient_ids,
     times = times,
     start_time = start_time,
-    time_unit = time_unit,
+    time_unit = if (!is.null(time_spec)) time_spec$unit else time_unit,
     t0 = t0_vec,
     grid_time = grid_time,
     # vars: sparse per-patient series (raw input after parsing)
@@ -152,7 +150,7 @@ print.ps_obs_grid <- function(x, ...) {
   stop("Unsupported t0 type. Use numeric, Date, or POSIXct.", call. = FALSE)
 }
 
-.parse_vars_tables <- function(vars, id_col, time_col) {
+.parse_vars_tables <- function(vars, id_col, time_col, time_spec) {
   patient_ids <- character()
   var_names_seen <- character()
   out <- list()
@@ -185,6 +183,16 @@ print.ps_obs_grid <- function(x, ...) {
       }
     } else {
       tt <- df[[time_col]]
+      # Convert calendar time to numeric model time if needed.
+      if (is.null(time_spec)) {
+        kind_tt <- .time_kind(tt[which(!is.na(tt))[1]])
+        if (kind_tt %in% c("Date", "POSIXct")) {
+          stop("Calendar times in `vars` require a time spec. Supply `ctx` with ctx$time$unit (and optional ctx$time$origin/zone) or provide `time_unit`.", call. = FALSE)
+        }
+      } else {
+        tt <- patientSimCore::ps_time_to_model(tt, time_spec)
+      }
+      tt <- as.numeric(tt)
       for (v in value_cols) {
         if (is.null(out[[v]])) out[[v]] <- list()
         for (pid in unique(ids)) {
@@ -220,27 +228,23 @@ print.ps_obs_grid <- function(x, ...) {
   res
 }
 
-.build_grid_time <- function(t0_vec, times, start_time, time_unit) {
+.build_grid_time <- function(t0_vec, times, start_time, time_spec) {
   offsets <- start_time + times
   res <- list()
   for (pid in names(t0_vec)) {
     t0 <- t0_vec[[pid]]
     kind <- .time_kind(t0)
-    if (kind == "numeric") {
-      res[[pid]] <- t0 + offsets
-    } else if (kind == "Date") {
-      if (time_unit != "days") stop("For Date t0, only time_unit='days' is supported in v0.0.1.", call. = FALSE)
-      res[[pid]] <- t0 + offsets
-    } else if (kind == "POSIXct") {
-      mult <- switch(time_unit,
-        seconds = 1,
-        minutes = 60,
-        hours = 3600,
-        days = 86400,
-        stop("Unsupported time_unit.", call. = FALSE)
-      )
-      res[[pid]] <- t0 + offsets * mult
+    if (kind != "numeric" && is.null(time_spec)) {
+      stop("Calendar times require a time spec. Supply `ctx` with ctx$time$unit (and optional ctx$time$origin/zone) or provide `time_unit`.", call. = FALSE)
     }
+    t0_num <- if (kind == "numeric") {
+      as.numeric(t0)
+    } else {
+      patientSimCore::ps_time_to_model(t0, time_spec)
+    }
+    .assert(is.numeric(t0_num) && length(t0_num) == 1L && is.finite(t0_num),
+            "t0 must resolve to a finite scalar numeric time.")
+    res[[pid]] <- t0_num + offsets
   }
   res
 }
@@ -418,7 +422,7 @@ print.ps_obs_grid <- function(x, ...) {
   list(alive_mask = alive, followup_defined = followup)
 }
 
-.summarize_events <- function(events, patient_ids, grid_time, event_time_col, event_type_col, id_col) {
+.summarize_events <- function(events, patient_ids, grid_time, event_time_col, event_type_col, id_col, time_spec) {
   .assert(is.data.frame(events), "`events` must be a data.frame.")
   .assert(all(c(id_col, event_time_col, event_type_col) %in% names(events)),
           sprintf("`events` must contain %s, %s, %s.", id_col, event_time_col, event_type_col))
@@ -439,6 +443,16 @@ print.ps_obs_grid <- function(x, ...) {
       gt <- grid_time[[pid]]
       tt <- sub[sub[[id_col]] == pid, event_time_col]
       if (length(tt) == 0) next
+      # Convert calendar time to numeric model time if needed.
+      if (is.null(time_spec)) {
+        kind_tt <- .time_kind(tt[which(!is.na(tt))[1]])
+        if (kind_tt %in% c("Date", "POSIXct")) {
+          stop("Calendar times in `events` require a time spec. Supply `ctx` with ctx$time$unit (and optional ctx$time$origin/zone) or provide `time_unit`.", call. = FALSE)
+        }
+      } else {
+        tt <- patientSimCore::ps_time_to_model(tt, time_spec)
+      }
+      tt <- as.numeric(tt)
       for (k in seq_len(m - 1)) {
         lo <- gt[k]; hi <- gt[k + 1]
         in_int <- (tt > lo) & (tt <= hi)

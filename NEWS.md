@@ -1,3 +1,7 @@
+## 1.2.1
+
+- Backend: build_obs_grid now supports Date/POSIXct calendar times for `t0` and input tables via patientSimCore time helpers (`ps_time_spec`, `ps_time_to_model`). Supported units include days, weeks, months (30.4375 days), and years (365.25 days), with time zone handling via `ctx$time$zone`.
+
 ## 1.2.0
 
 - Version bump to align with patientSim ecosystem v1.2.0. No functional changes.
