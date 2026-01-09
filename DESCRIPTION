@@ -1,7 +1,7 @@
 Package: patientSimValidation
 Type: Package
 Title: Validation tools for patientSim simulations
-Version: 1.2.1
+Version: 1.2.5
 Author: Jarrod Dalton [aut, cre]
 Maintainer: Jarrod Dalton <jarrod.dalton@gmail.com>
 Authors@R: person(given = "Jarrod",
@@ -13,7 +13,7 @@ License: Proprietary
 Encoding: UTF-8
 LazyData: true
 Imports:
-    patientSimCore (>= 1.2.4),
+    patientSimCore (>= 1.2.5),
     stats,
     utils
 Suggests:

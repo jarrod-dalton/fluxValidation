@@ -1,3 +1,15 @@
+## 1.2.5
+
+- Tests: align minimal test schemas with patientSimCore's authoritative variable type set (e.g., use `type = "continuous"` instead of legacy `"numeric"`).
+
+## 1.2.3
+
+- Tests: schema block expansion test schema now includes required `default` fields for variables, consistent with patientSimCore schema validation rules.
+
+## 1.2.2
+
+- Refactor: removed Validation's duplicated schema-handshake helpers and now relies on patientSimCore's authoritative schema utilities (`ps_schema_validate`, `ps_schema_var_info`) for schema block expansion.
+
 ## 1.2.1
 
 - Backend: build_obs_grid now supports Date/POSIXct calendar times for `t0` and input tables via patientSimCore time helpers (`ps_time_spec`, `ps_time_to_model`). Supported units include days, weeks, months (30.4375 days), and years (365.25 days), with time zone handling via `ctx$time$zone`.

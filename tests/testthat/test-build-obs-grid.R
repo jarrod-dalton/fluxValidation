@@ -35,8 +35,8 @@ test_that("window groups from schema blocks expand to variables", {
     data.frame(patient_id = c("p1","p1"), time = c(0, 1), sbp = c(120, 130), dbp = c(80, 85), stringsAsFactors = FALSE)
   )
   schema <- list(
-    sbp = list(type = "numeric", blocks = c("bp")),
-    dbp = list(type = "numeric", blocks = c("bp"))
+    sbp = list(type = "continuous", default = NA_real_, blocks = c("bp")),
+    dbp = list(type = "continuous", default = NA_real_, blocks = c("bp"))
   )
   obj <- build_obs_grid(vars, times = c(0,1,2), t0 = 0, schema = schema, window = c(bp = 1))
   expect_equal(unname(obj$state$sbp["p1", ]), c(120, 130, 130))
