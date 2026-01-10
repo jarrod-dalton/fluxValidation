@@ -1,5 +1,9 @@
 ## 1.2.5
 
+## 1.2.6
+
+- Add LICENSE file to align repository structure with ecosystem standards.
+
 - Tests: align minimal test schemas with patientSimCore's authoritative variable type set (e.g., use `type = "continuous"` instead of legacy `"numeric"`).
 
 ## 1.2.3
