@@ -5,22 +5,14 @@
 # summary objects (preferred) without requiring full ps_forecast objects.
 # ------------------------------------------------------------------------------
 
-#' Construct a categorical/binary state probability summary
-#'
-#' @param spec List with fields: var (character scalar), times (numeric),
-#'   start_time (numeric scalar), levels (character vector).
-#' @param result data.frame with columns: time, level, prob.
-#'
-#' @keywords internal
-new_ps_state_prob <- function(spec, result) {
+new_state_prob <- function(spec, result) {
   x <- list(spec = spec, result = result)
   class(x) <- "ps_state_prob"
-  validate_ps_state_prob(x)
+  validate_state_prob_object(x)
   x
 }
 
-#' @keywords internal
-validate_ps_state_prob <- function(x) {
+validate_state_prob_object <- function(x) {
   if (!is.list(x) || is.null(x$spec) || is.null(x$result)) {
     stop("ps_state_prob must be a list with spec and result.", call. = FALSE)
   }
@@ -34,22 +26,14 @@ validate_ps_state_prob <- function(x) {
   invisible(TRUE)
 }
 
-#' Construct a point/quantile state summary (continuous-ish)
-#'
-#' @param spec List with fields: var (character scalar), times (numeric),
-#'   start_time (numeric scalar).
-#' @param result data.frame with at minimum columns: time, mean.
-#'
-#' @keywords internal
-new_ps_state_point <- function(spec, result) {
+new_state_point <- function(spec, result) {
   x <- list(spec = spec, result = result)
   class(x) <- "ps_state_point"
-  validate_ps_state_point(x)
+  validate_state_point_object(x)
   x
 }
 
-#' @keywords internal
-validate_ps_state_point <- function(x) {
+validate_state_point_object <- function(x) {
   if (!is.list(x) || is.null(x$spec) || is.null(x$result)) {
     stop("ps_state_point must be a list with spec and result.", call. = FALSE)
   }

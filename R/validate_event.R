@@ -42,7 +42,7 @@ validate_event_risk <- function(
     if (is.null(ev) || !(event %in% ev)) stop("ps_risk does not contain requested event.", call. = FALSE)
     predicted <- pred
   } else {
-    predicted <- as_ps_risk(pred, event = event, times = times, start_time = start_time)
+    predicted <- as_risk(pred, event = event, times = times, start_time = start_time)
   }
 
   # observed curve

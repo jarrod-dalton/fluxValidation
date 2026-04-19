@@ -1,3 +1,9 @@
+## 1.4.0
+
+- API naming: removed `ps_` prefixes from adapter/check helpers. Public adapters are now `as_risk()`, `as_state_prob()`, `as_state_point()`, and `is_obs_grid()`.
+- Documentation: added/updated manual `.Rd` pages to match the renamed helpers.
+- Packaging hygiene: removed roxygen-style blocks from `R/` and standardized filenames to underscore style.
+
 ## 1.3.0
 
 - Coordinated ecosystem release v1.3.0.
@@ -17,11 +23,11 @@
 
 ## 1.2.2
 
-- Refactor: removed Validation's duplicated schema-handshake helpers and now relies on patientSimCore's authoritative schema utilities (`ps_schema_validate`, `ps_schema_var_info`) for schema block expansion.
+- Refactor: removed Validation's duplicated schema-handshake helpers and now relies on patientSimCore's authoritative schema utilities (`schema_validate`, `schema_var_info`) for schema block expansion.
 
 ## 1.2.1
 
-- Backend: build_obs_grid now supports Date/POSIXct calendar times for `t0` and input tables via patientSimCore time helpers (`ps_time_spec`, `ps_time_to_model`). Supported units include days, weeks, months (30.4375 days), and years (365.25 days), with time zone handling via `ctx$time$zone`.
+- Backend: build_obs_grid now supports Date/POSIXct calendar times for `t0` and input tables via patientSimCore time helpers (`time_spec`, `time_to_model`). Supported units include days, weeks, months (30.4375 days), and years (365.25 days), with time zone handling via `ctx$time$zone`.
 
 ## 1.2.0
 
@@ -42,12 +48,12 @@
 ## 0.1.2
 
 - Added vignettes explaining observed-data gridding, mask-driven denominators, and "apples-to-apples" event-risk estimands.
-- Added lightweight unit tests for forecast-adapter helpers (`as_ps_risk()`, `as_ps_state_prob()`, `as_ps_state_point()`).
+- Added lightweight unit tests for forecast-adapter helpers (`as_risk()`, `as_state_prob()`, `as_state_point()`).
 - Added `NEWS.md`.
 
 ## 0.1.1
 
-- Added forecast-to-summary adapters (`as_ps_risk()`, `as_ps_state_prob()`, `as_ps_state_point()`) so validation can prefer small prediction objects.
+- Added forecast-to-summary adapters (`as_risk()`, `as_state_prob()`, `as_state_point()`) so validation can prefer small prediction objects.
 - Expanded validation outputs with basic comparison tables/metrics while keeping denominators mask-driven.
 
 ## 0.1.0

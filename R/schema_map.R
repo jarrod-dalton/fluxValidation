@@ -12,12 +12,12 @@
 expand_window_groups <- function(schema, window_by_group_or_var) {
   # Helper for Stage 2: expand named windows declared by schema blocks into
   # per-variable windows. Kept internal for now.
-  patientSimCore::ps_schema_validate(schema)
+  patientSimCore::schema_validate(schema)
   .assert(is.numeric(window_by_group_or_var), "window mapping must be numeric")
   nm <- names(window_by_group_or_var)
   .assert(!is.null(nm) && all(nzchar(nm)), "window mapping must be a named numeric vector")
 
-  info <- patientSimCore::ps_schema_var_info(schema, names(schema))
+  info <- patientSimCore::schema_var_info(schema, names(schema))
   blocks_by_var <- setNames(info$blocks, info$var)
 
   # Named numeric vector of per-variable windows.

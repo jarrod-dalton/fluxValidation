@@ -33,9 +33,9 @@ build_obs_grid <- function(
   #   - time_unit (legacy arg) which will be wrapped into ctx$time$unit.
   time_spec <- NULL
   if (!is.null(ctx)) {
-    time_spec <- patientSimCore::ps_time_spec(ctx)
+    time_spec <- patientSimCore::time_spec(ctx)
   } else if (!is.null(time_unit) && nzchar(time_unit)) {
-    time_spec <- patientSimCore::ps_time_spec(list(time = list(unit = time_unit)))
+    time_spec <- patientSimCore::time_spec(list(time = list(unit = time_unit)))
   }
 
   parsed <- .parse_vars_tables(vars, id_col = id_col, time_col = time_col, time_spec = time_spec)
@@ -130,7 +130,7 @@ obj <- list(
   obj
 }
 
-is_ps_obs_grid <- function(x) inherits(x, "ps_obs_grid")
+is_obs_grid <- function(x) inherits(x, "ps_obs_grid")
 
 print.ps_obs_grid <- function(x, ...) {
   cat("<ps_obs_grid>\n")
@@ -190,7 +190,7 @@ print.ps_obs_grid <- function(x, ...) {
           stop("Calendar times in `vars` require a time spec. Supply `ctx` with ctx$time$unit (and optional ctx$time$origin/zone) or provide `time_unit`.", call. = FALSE)
         }
       } else {
-        tt <- patientSimCore::ps_time_to_model(tt, time_spec)
+        tt <- patientSimCore::time_to_model(tt, time_spec)
       }
       tt <- as.numeric(tt)
       for (v in value_cols) {
@@ -240,7 +240,7 @@ print.ps_obs_grid <- function(x, ...) {
     t0_num <- if (kind == "numeric") {
       as.numeric(t0)
     } else {
-      patientSimCore::ps_time_to_model(t0, time_spec)
+      patientSimCore::time_to_model(t0, time_spec)
     }
     .assert(is.numeric(t0_num) && length(t0_num) == 1L && is.finite(t0_num),
             "t0 must resolve to a finite scalar numeric time.")
@@ -450,7 +450,7 @@ print.ps_obs_grid <- function(x, ...) {
           stop("Calendar times in `events` require a time spec. Supply `ctx` with ctx$time$unit (and optional ctx$time$origin/zone) or provide `time_unit`.", call. = FALSE)
         }
       } else {
-        tt <- patientSimCore::ps_time_to_model(tt, time_spec)
+        tt <- patientSimCore::time_to_model(tt, time_spec)
       }
       tt <- as.numeric(tt)
       for (k in seq_len(m - 1)) {

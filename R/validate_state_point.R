@@ -25,18 +25,6 @@
   do.call(rbind, out)
 }
 
-#' Validate continuous-ish state variables against predicted means
-#'
-#' @param pred A ps_state_point summary (preferred). For future compatibility, a
-#'   list with $spec and $result fields that match ps_state_point is also accepted.
-#' @param obs A ps_obs_grid from build_obs_grid(). Must include obs$state[[var]].
-#' @param var Variable name (schema-convention) to validate.
-#' @param times Optional numeric vector of times to validate. Defaults to pred$spec$times.
-#' @param start_time Optional scalar. Defaults to pred$spec$start_time.
-#' @param measured_only Logical; if TRUE, restrict denominators to measured cells.
-#'
-#' @return list with predicted, observed (mean/sd), and meta.
-#' @export
 validate_state_point <- function(
   pred,
   obs,
@@ -50,7 +38,7 @@ validate_state_point <- function(
 
   # Allow ps_forecast input by adapting to a lightweight summary.
   if (inherits(pred, "ps_forecast")) {
-    x <- as_ps_state_point(pred, var = var, times = times, start_time = start_time)
+    x <- as_state_point(pred, var = var, times = times, start_time = start_time)
   } else if (inherits(pred, "ps_state_point")) {
     x <- pred
   } else if (is.list(pred) && !is.null(pred$spec) && !is.null(pred$result)) {

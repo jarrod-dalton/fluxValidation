@@ -8,7 +8,7 @@ test_that("build_obs_grid accepts vars-only and errors on duplicate vars", {
                stringsAsFactors = FALSE)
   )
   obj <- build_obs_grid(vars = vars, times = c(0,1,2), t0 = 0, default_window = 0)
-  expect_true(is_ps_obs_grid(obj))
+  expect_true(is_obs_grid(obj))
   expect_equal(length(obj$patient_ids), 2)
   expect_true("sbp" %in% names(obj$vars))
   expect_true(all(dim(obj$measured$sbp) == c(2,3)))
@@ -47,7 +47,7 @@ test_that("build_obs_grid requires time_unit for calendar t0", {
   vars <- list(data.frame(patient_id="p1", sex="F"))
   expect_error(build_obs_grid(vars, times=c(0,1), t0=as.Date("2020-01-01")), "time_unit")
   obj <- build_obs_grid(vars, times=c(0,1), t0=as.Date("2020-01-01"), time_unit="days")
-  expect_true(is_ps_obs_grid(obj))
+  expect_true(is_obs_grid(obj))
 })
 
 test_that("events summarization works", {

@@ -15,13 +15,7 @@
   invisible(TRUE)
 }
 
-#' Coerce prediction input to a ps_risk object
-#'
-#' @param x Either a ps_risk (returned unchanged) or a ps_forecast.
-#' @param ... Passed to patientSimForecast::risk() when x is a ps_forecast.
-#'
-#' @export
-as_ps_risk <- function(x, ...) {
+as_risk <- function(x, ...) {
   if (inherits(x, "ps_risk")) return(x)
   if (inherits(x, "ps_forecast")) {
     .require_forecast()
@@ -30,19 +24,7 @@ as_ps_risk <- function(x, ...) {
   stop("x must be a ps_risk or ps_forecast.", call. = FALSE)
 }
 
-#' Coerce prediction input to a ps_state_prob summary
-#'
-#' For categorical/binary/ordinal state validation.
-#'
-#' @param x Either a ps_state_prob (returned unchanged) or a ps_forecast.
-#' @param var Variable name.
-#' @param times Optional subset of times.
-#' @param start_time Required time in times used to align estimands.
-#' @param by Passed to patientSimForecast::state_summary(). Default pools by run.
-#' @param categorical_max_levels Passed to state_summary().
-#'
-#' @export
-as_ps_state_prob <- function(
+as_state_prob <- function(
   x,
   var,
   times = NULL,
@@ -74,7 +56,7 @@ as_ps_state_prob <- function(
     }
     if (is.null(lev)) lev <- character(0)
     spec <- list(var = var, times = if (is.null(times)) x$times else as.numeric(times), start_time = if (is.null(start_time)) x$time0 else as.numeric(start_time), levels = lev)
-    return(new_ps_state_prob(spec = spec, result = data.frame(time = numeric(0), level = character(0), prob = numeric(0))))
+    return(new_state_prob(spec = spec, result = data.frame(time = numeric(0), level = character(0), prob = numeric(0))))
   }
 
   lev <- unique(as.character(df$level))
@@ -94,21 +76,10 @@ as_ps_state_prob <- function(
   )
 
   spec <- list(var = var, times = as.numeric(times), start_time = as.numeric(start_time), levels = lev)
-  new_ps_state_prob(spec = spec, result = res)
+  new_state_prob(spec = spec, result = res)
 }
 
-#' Coerce prediction input to a ps_state_point summary
-#'
-#' For continuous-ish state validation.
-#'
-#' @param x Either a ps_state_point (returned unchanged) or a ps_forecast.
-#' @param var Variable name.
-#' @param times Optional subset of times.
-#' @param start_time Required time in times used to align estimands.
-#' @param by Passed to patientSimForecast::state_summary(). Default pools by run.
-#'
-#' @export
-as_ps_state_point <- function(
+as_state_point <- function(
   x,
   var,
   times = NULL,
@@ -127,7 +98,7 @@ as_ps_state_point <- function(
 
   if (is.null(df) || nrow(df) == 0) {
     spec <- list(var = var, times = if (is.null(times)) x$times else as.numeric(times), start_time = if (is.null(start_time)) x$time0 else as.numeric(start_time))
-    return(new_ps_state_point(spec = spec, result = data.frame(time = numeric(0), mean = numeric(0))))
+    return(new_state_point(spec = spec, result = data.frame(time = numeric(0), mean = numeric(0))))
   }
 
   if (is.null(times)) times <- sort(unique(as.numeric(df$time)))
@@ -142,5 +113,5 @@ as_ps_state_point <- function(
   res$time <- as.numeric(res$time)
 
   spec <- list(var = var, times = as.numeric(times), start_time = as.numeric(start_time))
-  new_ps_state_point(spec = spec, result = res[, intersect(names(res), c("time", "n", "mean", "sd", "min", "q1", "median", "q3", "max")), drop = FALSE])
+  new_state_point(spec = spec, result = res[, intersect(names(res), c("time", "n", "mean", "sd", "min", "q1", "median", "q3", "max")), drop = FALSE])
 }
