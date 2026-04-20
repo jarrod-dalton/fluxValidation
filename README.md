@@ -1,8 +1,8 @@
-# patientSimValidation
+# fluxValidation
 
-Validation utilities for the **patientSim** ecosystem.
+Validation utilities for the **flux** ecosystem.
 
-This package focuses on one job: **make observed/test-set patient data plug-compatible with `patientSimForecast` outputs** so you can compute validation metrics on an apples-to-apples basis.
+This package focuses on one job: **make observed/test-set entity data plug-compatible with `fluxForecast` outputs** so you can compute validation metrics on an apples-to-apples basis.
 
 ## Core ideas
 
@@ -18,7 +18,7 @@ This package focuses on one job: **make observed/test-set patient data plug-comp
 
 ```r
 # install.packages("remotes")
-remotes::install_github("jarrod-dalton/patientSimValidation")
+remotes::install_github("jarrod-dalton/fluxValidation")
 ```
 
 ## Quick start
@@ -26,17 +26,17 @@ remotes::install_github("jarrod-dalton/patientSimValidation")
 ### 1) Build an observed grid
 
 ```r
-library(patientSimValidation)
+library(fluxValidation)
 
 # Example: static + longitudinal panels
 df_static <- data.frame(
-  patient_id = c(1, 2),
+  entity_id = c(1, 2),
   sex = c("F", "M"),
   height_cm = c(165, 175)
 )
 
 df_bp <- data.frame(
-  patient_id = c(1, 1, 2),
+  entity_id = c(1, 1, 2),
   time = c(0, 6, 3),
   sbp = c(120, 128, 140),
   dbp = c(80,  82,  90)
@@ -44,7 +44,7 @@ df_bp <- data.frame(
 
 # Optional events table
 df_events <- data.frame(
-  patient_id = c(1, 2),
+  entity_id = c(1, 2),
   event_time = c(5, 7),
   event_type = c("mi", "mi")
 )
@@ -59,10 +59,10 @@ obs <- build_obs_grid(
 )
 ```
 
-### 2) Event risk validation (apples-to-apples with `patientSimForecast::risk()`)
+### 2) Event risk validation (apples-to-apples with `fluxForecast::event_prob()`)
 
 ```r
-# pred can be a ps_risk object (preferred) or a ps_forecast object
+# pred can be a flux_event_prob object (preferred) or a flux_forecast object
 # result <- validate_event_risk(pred, obs, event = "mi", obs_mode = "policy")
 ```
 
@@ -79,4 +79,4 @@ Rendered vignettes (if you build docs) live under `docs/`:
 
 ## License
 
-Proprietary.
+LGPL-3.

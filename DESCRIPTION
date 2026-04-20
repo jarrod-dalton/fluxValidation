@@ -1,24 +1,23 @@
-Package: patientSimValidation
+Package: fluxValidation
 Type: Package
-Title: Validation tools for patientSim simulations
-Version: 1.4.0
+Title: Validation tools for flux simulations
+Version: 1.5.0
 Author: Jarrod Dalton [aut, cre]
 Maintainer: Jarrod Dalton <daltonj@ccf.org>
 Authors@R: person(given = "Jarrod",
                   family = "Dalton",
                   role = c("aut", "cre"),
                   email = "daltonj@ccf.org")
-Description: Tools to align observed patient data to patientSim forecast grids and compute validation metrics.
-License: Proprietary
+Description: Tools to align observed entity data to flux forecast grids and compute validation metrics.
+License: LGPL-3
 Encoding: UTF-8
 LazyData: true
 Imports:
-    patientSimCore (>= 1.2.5),
-    stats,
-    utils
+    fluxCore (>= 1.5.0),
+    stats
 Suggests:
     testthat,
-    patientSimForecast,
+    fluxForecast (>= 1.5.0),
     knitr,
     rmarkdown
 VignetteBuilder: knitr

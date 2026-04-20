@@ -33,18 +33,18 @@ validate_state_point <- function(
   start_time = NULL,
   measured_only = FALSE
 ) {
-  if (!inherits(obs, "ps_obs_grid")) stop("obs must be a ps_obs_grid.", call. = FALSE)
+  if (!inherits(obs, "flux_obs_grid")) stop("obs must be a flux_obs_grid.", call. = FALSE)
   if (!is.character(var) || length(var) != 1L || !nzchar(var)) stop("var must be a non-empty character scalar.", call. = FALSE)
 
-  # Allow ps_forecast input by adapting to a lightweight summary.
-  if (inherits(pred, "ps_forecast")) {
+  # Allow flux_forecast input by adapting to a lightweight summary.
+  if (inherits(pred, "flux_forecast")) {
     x <- as_state_point(pred, var = var, times = times, start_time = start_time)
-  } else if (inherits(pred, "ps_state_point")) {
+  } else if (inherits(pred, "flux_state_point")) {
     x <- pred
   } else if (is.list(pred) && !is.null(pred$spec) && !is.null(pred$result)) {
     x <- pred
   } else {
-    stop("pred must be a ps_state_point, ps_forecast, or ps_state_point-like list.", call. = FALSE)
+    stop("pred must be a flux_state_point, flux_forecast, or flux_state_point-like list.", call. = FALSE)
   }
 
   if (is.null(times)) times <- x$spec$times

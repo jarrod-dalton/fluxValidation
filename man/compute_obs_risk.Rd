@@ -2,14 +2,21 @@
 \alias{compute_obs_risk}
 \title{Compute observed event risk curves on a forecast grid}
 \description{
-Compute observed event risk curves from a \code{ps_obs_grid}. This is a low-level helper
+Compute observed event risk curves from a \code{flux_obs_grid}. This is a low-level helper
 used by \code{validate_event_risk()}.
 }
 \usage{
-compute_obs_risk(obs, event, times = NULL, start_time, mode = c("policy", "interval"), measured_only = FALSE)
+compute_obs_risk(
+  obs,
+  event,
+  times = NULL,
+  start_time,
+  mode = c("policy", "interval"),
+  measured_only = FALSE
+)
 }
 \arguments{
-\item{obs}{A \code{ps_obs_grid}.}
+\item{obs}{A \code{flux_obs_grid}.}
 \item{event}{Character scalar event type.}
 \item{times}{Optional numeric subset of \code{obs$times}. Defaults to all.}
 \item{start_time}{Scalar reference time in \code{obs$times} at which to define the eligible cohort.}

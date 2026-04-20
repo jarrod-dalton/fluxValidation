@@ -12,7 +12,7 @@ build_obs_grid <- function(
   schema = NULL,
   default_window = 0,
   window = NULL,
-  id_col = "patient_id",
+  id_col = "entity_id",
   time_col = "time",
   event_time_col = "event_time",
   event_type_col = "event_type",
@@ -33,16 +33,16 @@ build_obs_grid <- function(
   #   - time_unit (legacy arg) which will be wrapped into ctx$time$unit.
   time_spec <- NULL
   if (!is.null(ctx)) {
-    time_spec <- patientSimCore::time_spec(ctx)
+    time_spec <- fluxCore::time_spec(ctx)
   } else if (!is.null(time_unit) && nzchar(time_unit)) {
-    time_spec <- patientSimCore::time_spec(list(time = list(unit = time_unit)))
+    time_spec <- fluxCore::time_spec(list(time = list(unit = time_unit)))
   }
 
   parsed <- .parse_vars_tables(vars, id_col = id_col, time_col = time_col, time_spec = time_spec)
-  patient_ids <- parsed$patient_ids
-  if (length(patient_ids) == 0) stop("No patients found in `vars`.", call. = FALSE)
+  entity_ids <- parsed$entity_ids
+  if (length(entity_ids) == 0) stop("No entities found in `vars`.", call. = FALSE)
 
-  t0_vec <- .compute_t0(patient_ids, parsed, t0 = t0)
+  t0_vec <- .compute_t0(entity_ids, parsed, t0 = t0)
 
   grid_kind <- .time_kind(t0_vec[[1]])
   if (grid_kind %in% c("Date", "POSIXct")) {
@@ -75,7 +75,7 @@ build_obs_grid <- function(
 
   ev <- NULL
   if (!is.null(events)) {
-    ev <- .summarize_events(events, patient_ids, grid_time,
+    ev <- .summarize_events(events, entity_ids, grid_time,
                             event_time_col = event_time_col,
                             event_type_col = event_type_col,
                             id_col = id_col,
@@ -86,12 +86,12 @@ build_obs_grid <- function(
 # model_defined: optional support masks for variables over the grid.
 # Can be:
 # - NULL (default all TRUE),
-# - a named list of logical matrices [n_patients x n_times] keyed by variable name.
+# - a named list of logical matrices [n_entities x n_times] keyed by variable name.
 model_defined_out <- model_defined
 if (is.null(model_defined_out)) {
   model_defined_out <- lapply(names(parsed$vars), function(v) {
-    matrix(TRUE, nrow = length(patient_ids), ncol = length(times),
-           dimnames = list(patient_ids, as.character(times)))
+    matrix(TRUE, nrow = length(entity_ids), ncol = length(times),
+           dimnames = list(entity_ids, as.character(times)))
   })
   names(model_defined_out) <- names(parsed$vars)
 }
@@ -99,23 +99,23 @@ if (is.null(model_defined_out)) {
 # at_risk: optional risk-set masks for events over intervals.
 # Can be:
 # - NULL (default all TRUE),
-# - a named list of logical matrices [n_patients x (n_times-1)] keyed by event type.
+# - a named list of logical matrices [n_entities x (n_times-1)] keyed by event type.
 at_risk_out <- at_risk
 if (is.null(at_risk_out) && !is.null(ev)) {
   at_risk_out <- lapply(ev$event_types, function(et) {
-    matrix(TRUE, nrow = length(patient_ids), ncol = max(0, length(times) - 1L),
-           dimnames = list(patient_ids, paste0(as.character(times[-length(times)]), "->", as.character(times[-1L]))))
+    matrix(TRUE, nrow = length(entity_ids), ncol = max(0, length(times) - 1L),
+           dimnames = list(entity_ids, paste0(as.character(times[-length(times)]), "->", as.character(times[-1L]))))
   })
   names(at_risk_out) <- ev$event_types
 }
 obj <- list(
-    patient_ids = patient_ids,
+    entity_ids = entity_ids,
     times = times,
     start_time = start_time,
     time_unit = if (!is.null(time_spec)) time_spec$unit else time_unit,
     t0 = t0_vec,
     grid_time = grid_time,
-    # vars: sparse per-patient series (raw input after parsing)
+    # vars: sparse per-entity series (raw input after parsing)
     vars = parsed$vars,
     # state: gridded values on the forecast grid (LOCF-within-window)
     state = grid_state$state,
@@ -126,15 +126,15 @@ obj <- list(
     model_defined = model_defined_out,
     at_risk = at_risk_out
   )
-  class(obj) <- "ps_obs_grid"
+  class(obj) <- "flux_obs_grid"
   obj
 }
 
-is_obs_grid <- function(x) inherits(x, "ps_obs_grid")
+is_obs_grid <- function(x) inherits(x, "flux_obs_grid")
 
-print.ps_obs_grid <- function(x, ...) {
-  cat("<ps_obs_grid>\n")
-  cat("  Patients:", length(x$patient_ids), "\n")
+print.flux_obs_grid <- function(x, ...) {
+  cat("<flux_obs_grid>\n")
+  cat("  Patients:", length(x$entity_ids), "\n")
   cat("  Times:", length(x$times), "offsets\n")
   cat("  Variables:", length(x$vars), "\n")
   if (!is.null(x$events)) cat("  Event types:", length(x$events$event_types), "\n")
@@ -151,7 +151,7 @@ print.ps_obs_grid <- function(x, ...) {
 }
 
 .parse_vars_tables <- function(vars, id_col, time_col, time_spec) {
-  patient_ids <- character()
+  entity_ids <- character()
   var_names_seen <- character()
   out <- list()
 
@@ -161,7 +161,7 @@ print.ps_obs_grid <- function(x, ...) {
     .assert(id_col %in% names(df), sprintf("vars[[%d]] must contain '%s'.", idx, id_col))
 
     ids <- as.character(df[[id_col]])
-    patient_ids <- unique(c(patient_ids, ids))
+    entity_ids <- unique(c(entity_ids, ids))
 
     has_time <- time_col %in% names(df)
     value_cols <- setdiff(names(df), c(id_col, if (has_time) time_col else character()))
@@ -190,7 +190,7 @@ print.ps_obs_grid <- function(x, ...) {
           stop("Calendar times in `vars` require a time spec. Supply `ctx` with ctx$time$unit (and optional ctx$time$origin/zone) or provide `time_unit`.", call. = FALSE)
         }
       } else {
-        tt <- patientSimCore::time_to_model(tt, time_spec)
+        tt <- fluxCore::time_to_model(tt, time_spec)
       }
       tt <- as.numeric(tt)
       for (v in value_cols) {
@@ -210,21 +210,21 @@ print.ps_obs_grid <- function(x, ...) {
     }
   }
 
-  list(patient_ids = sort(unique(patient_ids)), vars = out)
+  list(entity_ids = sort(unique(entity_ids)), vars = out)
 }
 
-.compute_t0 <- function(patient_ids, parsed, t0) {
+.compute_t0 <- function(entity_ids, parsed, t0) {
   if (is.function(t0)) {
     res <- list()
-    for (pid in patient_ids) {
+    for (pid in entity_ids) {
       val <- t0(pid = pid, parsed = parsed)
       res[[pid]] <- val
     }
     return(res)
   }
   .assert(length(t0) == 1, "`t0` must be a scalar or a function.")
-  res <- setNames(vector("list", length(patient_ids)), patient_ids)
-  for (pid in patient_ids) res[[pid]] <- t0
+  res <- stats::setNames(vector("list", length(entity_ids)), entity_ids)
+  for (pid in entity_ids) res[[pid]] <- t0
   res
 }
 
@@ -240,7 +240,7 @@ print.ps_obs_grid <- function(x, ...) {
     t0_num <- if (kind == "numeric") {
       as.numeric(t0)
     } else {
-      patientSimCore::time_to_model(t0, time_spec)
+      fluxCore::time_to_model(t0, time_spec)
     }
     .assert(is.numeric(t0_num) && length(t0_num) == 1L && is.finite(t0_num),
             "t0 must resolve to a finite scalar numeric time.")
@@ -253,7 +253,7 @@ print.ps_obs_grid <- function(x, ...) {
   .assert(is.character(vars) && length(vars) >= 1L, "vars must be a non-empty character vector")
   .assert(is.numeric(default_window) && length(default_window) == 1L && is.finite(default_window),
           "default_window must be a finite scalar numeric")
-  out <- setNames(rep(default_window, length(vars)), vars)
+  out <- stats::setNames(rep(default_window, length(vars)), vars)
 
   if (!is.null(window)) {
     .assert(is.numeric(window), "window must be numeric when provided")
@@ -285,8 +285,8 @@ print.ps_obs_grid <- function(x, ...) {
 }
 
 .grid_state_locf <- function(parsed, grid_time, times, lookback_by_var) {
-  patient_ids <- names(grid_time)
-  n <- length(patient_ids)
+  entity_ids <- names(grid_time)
+  n <- length(entity_ids)
   m <- length(times)
   state <- list()
   measured <- list()
@@ -297,10 +297,10 @@ print.ps_obs_grid <- function(x, ...) {
 
   for (v in names(parsed$vars)) {
     lb <- lookback_by_var[[v]]
-    mat <- matrix(NA, nrow = n, ncol = m, dimnames = list(patient_ids, as.character(times)))
-    meas <- matrix(FALSE, nrow = n, ncol = m, dimnames = list(patient_ids, as.character(times)))
-    for (i in seq_along(patient_ids)) {
-      pid <- patient_ids[[i]]
+    mat <- matrix(NA, nrow = n, ncol = m, dimnames = list(entity_ids, as.character(times)))
+    meas <- matrix(FALSE, nrow = n, ncol = m, dimnames = list(entity_ids, as.character(times)))
+    for (i in seq_along(entity_ids)) {
+      pid <- entity_ids[[i]]
       series <- parsed$vars[[v]][[pid]]
       if (is.null(series)) next
       if (is.null(series$time)) {
@@ -341,15 +341,15 @@ print.ps_obs_grid <- function(x, ...) {
 }
 
 .compute_measured <- function(parsed, grid_time, times, lookback) {
-  patient_ids <- names(grid_time)
-  n <- length(patient_ids)
+  entity_ids <- names(grid_time)
+  n <- length(entity_ids)
   m <- length(times)
   out <- list()
 
   for (v in names(parsed$vars)) {
-    mat <- matrix(FALSE, nrow = n, ncol = m, dimnames = list(patient_ids, NULL))
-    for (i in seq_along(patient_ids)) {
-      pid <- patient_ids[i]
+    mat <- matrix(FALSE, nrow = n, ncol = m, dimnames = list(entity_ids, NULL))
+    for (i in seq_along(entity_ids)) {
+      pid <- entity_ids[i]
       series <- parsed$vars[[v]][[pid]]
       if (is.null(series)) next
       if (is.null(series$time)) {
@@ -374,18 +374,18 @@ print.ps_obs_grid <- function(x, ...) {
 }
 
 .compute_basic_followup_masks <- function(parsed, grid_time) {
-  patient_ids <- names(grid_time)
-  n <- length(patient_ids)
-  m <- length(grid_time[[patient_ids[1]]])
+  entity_ids <- names(grid_time)
+  n <- length(entity_ids)
+  m <- length(grid_time[[entity_ids[1]]])
   # alive_mask: TRUE/FALSE/NA (NA = vital status unknown after follow-up stop)
-  alive <- matrix(TRUE, nrow = n, ncol = m, dimnames = list(patient_ids, NULL))
-  followup <- matrix(TRUE, nrow = n, ncol = m, dimnames = list(patient_ids, NULL))
+  alive <- matrix(TRUE, nrow = n, ncol = m, dimnames = list(entity_ids, NULL))
+  followup <- matrix(TRUE, nrow = n, ncol = m, dimnames = list(entity_ids, NULL))
 
   death_var <- if ("death_date" %in% names(parsed$vars)) "death_date" else NULL
   last_contact_var <- if ("last_contact_date" %in% names(parsed$vars)) "last_contact_date" else NULL
 
-  for (i in seq_along(patient_ids)) {
-    pid <- patient_ids[i]
+  for (i in seq_along(entity_ids)) {
+    pid <- entity_ids[i]
     gt <- grid_time[[pid]]
 
     death_date <- NULL
@@ -422,24 +422,24 @@ print.ps_obs_grid <- function(x, ...) {
   list(alive_mask = alive, followup_defined = followup)
 }
 
-.summarize_events <- function(events, patient_ids, grid_time, event_time_col, event_type_col, id_col, time_spec) {
+.summarize_events <- function(events, entity_ids, grid_time, event_time_col, event_type_col, id_col, time_spec) {
   .assert(is.data.frame(events), "`events` must be a data.frame.")
   .assert(all(c(id_col, event_time_col, event_type_col) %in% names(events)),
           sprintf("`events` must contain %s, %s, %s.", id_col, event_time_col, event_type_col))
   events[[id_col]] <- as.character(events[[id_col]])
   ev_types <- sort(unique(as.character(events[[event_type_col]])))
-  n <- length(patient_ids)
-  m <- length(grid_time[[patient_ids[1]]])
+  n <- length(entity_ids)
+  m <- length(grid_time[[entity_ids[1]]])
 
   any_list <- list()
   count_list <- list()
 
   for (et in ev_types) {
-    any_mat <- matrix(0L, nrow = n, ncol = max(m - 1, 1), dimnames = list(patient_ids, NULL))
-    count_mat <- matrix(0L, nrow = n, ncol = max(m - 1, 1), dimnames = list(patient_ids, NULL))
+    any_mat <- matrix(0L, nrow = n, ncol = max(m - 1, 1), dimnames = list(entity_ids, NULL))
+    count_mat <- matrix(0L, nrow = n, ncol = max(m - 1, 1), dimnames = list(entity_ids, NULL))
     sub <- events[as.character(events[[event_type_col]]) == et, , drop = FALSE]
-    for (i in seq_along(patient_ids)) {
-      pid <- patient_ids[i]
+    for (i in seq_along(entity_ids)) {
+      pid <- entity_ids[i]
       gt <- grid_time[[pid]]
       tt <- sub[sub[[id_col]] == pid, event_time_col]
       if (length(tt) == 0) next
@@ -450,7 +450,7 @@ print.ps_obs_grid <- function(x, ...) {
           stop("Calendar times in `events` require a time spec. Supply `ctx` with ctx$time$unit (and optional ctx$time$origin/zone) or provide `time_unit`.", call. = FALSE)
         }
       } else {
-        tt <- patientSimCore::time_to_model(tt, time_spec)
+        tt <- fluxCore::time_to_model(tt, time_spec)
       }
       tt <- as.numeric(tt)
       for (k in seq_len(m - 1)) {

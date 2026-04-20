@@ -1,4 +1,4 @@
 library(testthat)
-library(patientSimValidation)
+library(fluxValidation)
 
-test_check("patientSimValidation")
+test_check("fluxValidation")

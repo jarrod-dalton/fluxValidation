@@ -1,27 +1,28 @@
 # ------------------------------------------------------------------------------
-# Adapters: convert ps_forecast (patientSimForecast) objects into lightweight
-# summary objects preferred by patientSimValidation.
+# Adapters: convert flux_forecast (fluxForecast) objects into lightweight
+# summary objects preferred by fluxValidation.
 #
 # Validation remains read-only with respect to Forecast outputs.
 # ------------------------------------------------------------------------------
 
 .require_forecast <- function() {
-  if (!requireNamespace("patientSimForecast", quietly = TRUE)) {
+  if (!requireNamespace("fluxForecast", quietly = TRUE)) {
     stop(
-      "patientSimForecast is required for this operation but is not installed.",
+      "fluxForecast is required for this operation but is not installed.",
       call. = FALSE
     )
   }
   invisible(TRUE)
 }
 
-as_risk <- function(x, ...) {
-  if (inherits(x, "ps_risk")) return(x)
-  if (inherits(x, "ps_forecast")) {
+as_event_prob <- function(x, ...) {
+  if (inherits(x, "flux_event_prob")) return(x)
+  if (inherits(x, "flux_forecast")) {
     .require_forecast()
-    return(patientSimForecast::risk(x, ...))
+    f <- getExportedValue("fluxForecast", "event_prob")
+    return(f(x, ...))
   }
-  stop("x must be a ps_risk or ps_forecast.", call. = FALSE)
+  stop("x must be a flux_event_prob or flux_forecast.", call. = FALSE)
 }
 
 as_state_prob <- function(
@@ -29,18 +30,18 @@ as_state_prob <- function(
   var,
   times = NULL,
   start_time = NULL,
-  by = c("run", "patient", "patient_draw"),
+  by = c("run", "entity", "entity_param_draw"),
   categorical_max_levels = 50
 ) {
-  if (inherits(x, "ps_state_prob")) return(x)
-  if (!inherits(x, "ps_forecast")) stop("x must be a ps_state_prob or ps_forecast.", call. = FALSE)
+  if (inherits(x, "flux_state_prob")) return(x)
+  if (!inherits(x, "flux_forecast")) stop("x must be a flux_state_prob or flux_forecast.", call. = FALSE)
 
   .require_forecast()
 
   by <- match.arg(by)
 
   # state_summary returns a named list of data.frames (one per var)
-  ss <- patientSimForecast::state_summary(
+  ss <- fluxForecast::state_summary(
     x,
     vars = var,
     times = times,
@@ -84,16 +85,16 @@ as_state_point <- function(
   var,
   times = NULL,
   start_time = NULL,
-  by = c("run", "patient", "patient_draw")
+  by = c("run", "entity", "entity_param_draw")
 ) {
-  if (inherits(x, "ps_state_point")) return(x)
-  if (!inherits(x, "ps_forecast")) stop("x must be a ps_state_point or ps_forecast.", call. = FALSE)
+  if (inherits(x, "flux_state_point")) return(x)
+  if (!inherits(x, "flux_forecast")) stop("x must be a flux_state_point or flux_forecast.", call. = FALSE)
 
   .require_forecast()
 
   by <- match.arg(by)
 
-  ss <- patientSimForecast::state_summary(x, vars = var, times = times, by = by)
+  ss <- fluxForecast::state_summary(x, vars = var, times = times, by = by)
   df <- ss[[var]]
 
   if (is.null(df) || nrow(df) == 0) {

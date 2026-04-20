@@ -4,7 +4,7 @@
 # Two estimands are supported:
 #
 # 1) policy (Forecast-compatible): fix the denominator at `t_ref` (start_time)
-#    and keep those patients in the denominator at all subsequent times,
+#    and keep those entities in the denominator at all subsequent times,
 #    regardless of follow-up truncation. Events are counted when observed.
 #
 # 2) interval: interval-specific risk-set denominators using at_risk_e[k,i].
@@ -21,7 +21,7 @@ compute_obs_risk <- function(
   measured_only = FALSE
 ) {
   mode <- match.arg(mode)
-  if (!inherits(obs, "ps_obs_grid")) stop("obs must be a ps_obs_grid.", call. = FALSE)
+  if (!inherits(obs, "flux_obs_grid")) stop("obs must be a flux_obs_grid.", call. = FALSE)
   if (!is.character(event) || length(event) != 1L || !nzchar(event)) stop("event must be a non-empty character scalar.", call. = FALSE)
 
   if (is.null(times)) times <- obs$times
@@ -58,9 +58,9 @@ compute_obs_risk <- function(
   eligible <- as.logical(denom0[, 1])
   n_eligible <- sum(eligible)
 
-  any_mat <- obs$events$any[[event]]  # [patients x (T-1)] integer
+  any_mat <- obs$events$any[[event]]  # [entities x (T-1)] integer
 
-  # Compute first interval index of event for each patient
+  # Compute first interval index of event for each entity
   first_int <- rep(NA_integer_, nrow(any_mat))
   for (i in seq_len(nrow(any_mat))) {
     idx <- which(any_mat[i, ] > 0L)
@@ -105,7 +105,7 @@ compute_obs_risk <- function(
   t_idx <- match(times, obs$times)
   t0_idx <- match(start_time, obs$times)
 
-  any_mat <- obs$events$any[[event]]  # [patients x (T-1)]
+  any_mat <- obs$events$any[[event]]  # [entities x (T-1)]
   at_risk_e <- NULL
   if (!is.null(obs$at_risk) && is.list(obs$at_risk) && !is.null(obs$at_risk[[event]])) {
     at_risk_e <- obs$at_risk[[event]]

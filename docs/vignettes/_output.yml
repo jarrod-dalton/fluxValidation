@@ -4,4 +4,4 @@ html_document:
   number_sections: false
   theme: null
   highlight: tango
-  css: "../docs/patientSimDocs.css"
+  css: "../docs/fluxDocs.css"

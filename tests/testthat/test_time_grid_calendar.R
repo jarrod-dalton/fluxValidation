@@ -2,7 +2,7 @@ test_that("build_obs_grid supports Date t0 and Date state times using ctx$time u
   ctx_weeks <- list(time = list(unit = "weeks", origin = as.Date("1970-01-01"), zone = "UTC"))
 
   vars <- list(
-    data.frame(patient_id = c("p1","p1","p2"),
+    data.frame(entity_id = c("p1","p1","p2"),
                time = as.Date(c("2020-01-01","2020-01-08","2020-01-01")),
                sbp = c(120, 130, 110),
                stringsAsFactors = FALSE)
@@ -32,7 +32,7 @@ test_that("build_obs_grid supports POSIXct t0 and POSIXct times via ctx$time (ho
                           zone = "UTC"))
 
   vars <- list(
-    data.frame(patient_id = c("p1","p1"),
+    data.frame(entity_id = c("p1","p1"),
                time = as.POSIXct(c("2020-01-01 00:00:00","2020-01-01 01:00:00"), tz = "UTC"),
                sbp = c(120, 130),
                stringsAsFactors = FALSE)
@@ -46,7 +46,7 @@ test_that("build_obs_grid supports POSIXct t0 and POSIXct times via ctx$time (ho
 
 test_that("build_obs_grid errors for calendar t0 without ctx/time_unit and errors for invalid zone", {
   vars <- list(
-    data.frame(patient_id = c("p1"),
+    data.frame(entity_id = c("p1"),
                time = as.Date("2020-01-01"),
                sbp = 120,
                stringsAsFactors = FALSE)

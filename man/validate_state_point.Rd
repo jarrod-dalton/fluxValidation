@@ -1,13 +1,20 @@
 \name{validate_state_point}
 \alias{validate_state_point}
 \title{Validate continuous-ish state variables against predicted means}
-\description{\code{validate_state_point} compares observed, grid-aligned state values from a \code{ps_obs_grid} to predicted means supplied as a \code{ps_state_point} summary object (or a compatible list). Denominators are computed from explicit masks, not from missing values.}
+\description{\code{validate_state_point} compares observed, grid-aligned state values from a \code{flux_obs_grid} to predicted means supplied as a \code{flux_state_point} summary object (or a compatible list). Denominators are computed from explicit masks, not from missing values.}
 \usage{
-validate_state_point(pred, obs, var, times = NULL, start_time = NULL, measured_only = FALSE)
+validate_state_point(
+  pred,
+  obs,
+  var,
+  times = NULL,
+  start_time = NULL,
+  measured_only = FALSE
+)
 }
 \arguments{
-  \item{pred}{A \code{ps_state_point} summary (preferred) or a list with \code{$spec} and \code{$result}.}
-  \item{obs}{A \code{ps_obs_grid} produced by \code{build_obs_grid()}. Must include \code{obs$state[[var]]}.}
+  \item{pred}{A \code{flux_state_point} summary (preferred) or a list with \code{$spec} and \code{$result}.}
+  \item{obs}{A \code{flux_obs_grid} produced by \code{build_obs_grid()}. Must include \code{obs$state[[var]]}.}
   \item{var}{Variable name to validate (schema naming convention).}
   \item{times}{Optional numeric vector of times to validate. Defaults to \code{pred$spec$times}.}
   \item{start_time}{Optional scalar reference time. Defaults to \code{pred$spec$start_time}.}

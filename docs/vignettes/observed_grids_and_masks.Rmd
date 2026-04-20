@@ -20,7 +20,7 @@ pre{padding:12px;border-radius:8px;background:#f6f8fa;overflow-x:auto;}
 
 ## Goal
 
-`patientSimValidation` exists to compare *observed/test-set* patient data against simulation outputs on an **explicit forecast grid**.
+`fluxValidation` exists to compare *observed/test-set* entity data against simulation outputs on an **explicit forecast grid**.
 
 The key idea is that *denominators are never inferred from NA values*. Instead, denominators are computed from explicit masks:
 
@@ -35,23 +35,23 @@ If you remember only one thing: **NA values are data; masks decide who is scored
 
 Observed state variables are provided as a list of wide-ish tables.
 
-- *Static tables* must include `patient_id` and **no** `time` column.
-- *Longitudinal tables* must include `patient_id`, `time`, and one or more measured variables.
+- *Static tables* must include `entity_id` and **no** `time` column.
+- *Longitudinal tables* must include `entity_id`, `time`, and one or more measured variables.
 
 This lets users naturally group variables that are measured together (e.g., SBP and DBP).
 
 ```{r setup, message=FALSE}
-library(patientSimValidation)
+library(fluxValidation)
 ```
 
 ```{r build-obs, message=FALSE}
 vars <- list(
   # Static variables
-  data.frame(patient_id = c("p1","p2"), sex = c("F","M"), stringsAsFactors = FALSE),
+  data.frame(entity_id = c("p1","p2"), sex = c("F","M"), stringsAsFactors = FALSE),
 
   # A measurement panel ("bp")
   data.frame(
-    patient_id = c("p1","p1","p2"),
+    entity_id = c("p1","p1","p2"),
     time = c(0, 1, 0),
     sbp = c(120, 130, 110),
     dbp = c(80,  85,  70),

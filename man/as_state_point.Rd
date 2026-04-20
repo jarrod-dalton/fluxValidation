@@ -1,13 +1,21 @@
 \name{as_state_point}
 \alias{as_state_point}
 \title{Coerce prediction input to a state-point summary}
-\usage{as_state_point(x, var, times = NULL, start_time = NULL, by = c("run", "patient", "patient_draw"))}
+\usage{
+as_state_point(
+  x,
+  var,
+  times = NULL,
+  start_time = NULL,
+  by = c("run", "entity", "entity_param_draw")
+)
+}
 \arguments{
-\item{x}{Either a \code{ps_state_point} (returned unchanged) or a \code{ps_forecast}.}
+\item{x}{Either a \code{flux_state_point} (returned unchanged) or a \code{flux_forecast}.}
 \item{var}{Variable name.}
 \item{times}{Optional subset of times.}
 \item{start_time}{Optional start time used to align estimands.}
-\item{by}{Grouping passed to \code{patientSimForecast::state_summary()}.}
+\item{by}{Grouping passed to \code{fluxForecast::state_summary()}.}
 }
-\value{A \code{ps_state_point} object.}
+\value{A \code{flux_state_point} object.}
 \description{Converts forecast inputs to continuous-ish state point summaries for validation.}

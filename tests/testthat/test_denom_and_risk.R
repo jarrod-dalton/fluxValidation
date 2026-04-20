@@ -16,9 +16,9 @@ test_that("make_denom_mask enforces spec invariants and measured_only", {
 })
 
 test_that("compute_obs_risk policy vs interval behave as expected", {
-  vars <- list(data.frame(patient_id=c("p1","p2"), sex=c("F","M")))
+  vars <- list(data.frame(entity_id=c("p1","p2"), sex=c("F","M")))
   events <- data.frame(
-    patient_id=c("p1","p2"),
+    entity_id=c("p1","p2"),
     event_time=c(0.5, 1.2),
     event_type=c("E","E"),
     stringsAsFactors = FALSE

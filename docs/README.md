@@ -8,4 +8,4 @@ To render locally (from the package root):
 Rscript tools/render_docs.R
 ```
 
-That will compile `vignettes/*.Rmd` into `docs/*.html` using the lightweight CSS in `docs/patientSimDocs.css`.
+That will compile `vignettes/*.Rmd` into `docs/*.html` using the lightweight CSS in `docs/fluxDocs.css`.

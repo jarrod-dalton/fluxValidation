@@ -30,7 +30,7 @@
   if (is.null(obs$state) || is.null(obs$state[[var]])) {
     stop(sprintf("obs does not contain gridded state for var '%s'.", var), call. = FALSE)
   }
-  X <- obs$state[[var]]  # [patients x times]
+  X <- obs$state[[var]]  # [entities x times]
   if (!is.matrix(X)) stop("obs$state[[var]] must be a matrix.", call. = FALSE)
 
   t_idx <- match(times, obs$times)
@@ -59,18 +59,18 @@ validate_state_prob <- function(
   start_time = NULL,
   measured_only = FALSE
 ) {
-  if (!inherits(obs, "ps_obs_grid")) stop("obs must be a ps_obs_grid.", call. = FALSE)
+  if (!inherits(obs, "flux_obs_grid")) stop("obs must be a flux_obs_grid.", call. = FALSE)
   if (!is.character(var) || length(var) != 1L || !nzchar(var)) stop("var must be a non-empty character scalar.", call. = FALSE)
 
-  # Allow ps_forecast input by adapting to a lightweight summary.
-  if (inherits(pred, "ps_forecast")) {
+  # Allow flux_forecast input by adapting to a lightweight summary.
+  if (inherits(pred, "flux_forecast")) {
     x <- as_state_prob(pred, var = var, times = times, start_time = start_time)
-  } else if (inherits(pred, "ps_state_prob")) {
+  } else if (inherits(pred, "flux_state_prob")) {
     x <- pred
   } else if (is.list(pred) && !is.null(pred$spec) && !is.null(pred$result)) {
     x <- pred
   } else {
-    stop("pred must be a ps_state_prob, ps_forecast, or ps_state_prob-like list.", call. = FALSE)
+    stop("pred must be a flux_state_prob, flux_forecast, or flux_state_prob-like list.", call. = FALSE)
   }
 
   if (is.null(times)) times <- x$spec$times
