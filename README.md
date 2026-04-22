@@ -71,12 +71,6 @@ obs <- build_obs_grid(
 - Use `validate_state_prob()` for binary/categorical/ordinal variables when you have predicted level probabilities.
 - Use `validate_state_point()` for numeric variables when you have predicted means (or point summaries).
 
-## Documentation
-
-Rendered vignettes (if you build docs) live under `docs/`:
-- observed grids + masks
-- event risk apples-to-apples estimands
-
 ## License
 
 LGPL-3.
