@@ -1,11 +1,7 @@
 # Docs
 
-This folder is intended to contain rendered HTML copies of the package vignettes.
+Canonical tutorial content now lives in the super-repo `tutorials/` path:
 
-To render locally (from the package root):
+- https://github.com/jarrod-dalton/flux/tree/main/tutorials
 
-```r
-Rscript tools/render_docs.R
-```
-
-That will compile `vignettes/*.Rmd` into `docs/*.html` using the lightweight CSS in `docs/fluxDocs.css`.
+This package `docs/` directory is reserved for package-local reference artifacts.
