@@ -44,7 +44,7 @@ test_that("build_obs_grid supports POSIXct t0 and POSIXct times via ctx$time (ho
   expect_equal(as.numeric(g$grid_time[["p1"]][2] - g$grid_time[["p1"]][1]), 1)
 })
 
-test_that("build_obs_grid errors for calendar t0 without ctx/time_unit and errors for invalid zone", {
+test_that("build_obs_grid errors for calendar t0 without ctx/time_spec and errors for invalid zone", {
   vars <- list(
     data.frame(entity_id = c("p1"),
                time = as.Date("2020-01-01"),
@@ -54,7 +54,7 @@ test_that("build_obs_grid errors for calendar t0 without ctx/time_unit and error
 
   expect_error(
     build_obs_grid(vars = vars, times = c(0, 1), t0 = as.Date("2020-01-01")),
-    "ctx$time$unit",
+    "time_spec",
     fixed = TRUE
   )
 

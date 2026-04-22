@@ -1,3 +1,10 @@
+## 1.5.1
+
+- Updated `build_obs_grid()` to use canonical `time_spec` object inputs
+  (runtime `time_unit` argument removed).
+- Synchronized manual docs and tests with canonical-time semantics and
+  conflict detection between explicit `time_spec` and context metadata.
+
 ## 1.5.0
 
 - Validation adapters and docs fully aligned to event-probability forecast APIs (as_event_prob and related references).

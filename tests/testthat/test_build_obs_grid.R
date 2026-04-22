@@ -43,11 +43,34 @@ test_that("window groups from schema blocks expand to variables", {
   expect_equal(unname(obj$state$dbp["p1", ]), c(80, 85, 85))
 })
 
-test_that("build_obs_grid requires time_unit for calendar t0", {
+test_that("build_obs_grid requires time_spec for calendar t0", {
   vars <- list(data.frame(entity_id="p1", sex="F"))
-  expect_error(build_obs_grid(vars, times=c(0,1), t0=as.Date("2020-01-01")), "time_unit")
-  obj <- build_obs_grid(vars, times=c(0,1), t0=as.Date("2020-01-01"), time_unit="days")
+  expect_error(build_obs_grid(vars, times=c(0,1), t0=as.Date("2020-01-01")), "time_spec")
+  obj <- build_obs_grid(vars, times=c(0,1), t0=as.Date("2020-01-01"), time_spec = fluxCore::time_spec(unit = "days"))
   expect_true(is_obs_grid(obj))
+})
+
+test_that("build_obs_grid errors when time_spec conflicts with ctx time metadata", {
+  vars <- list(
+    data.frame(
+      entity_id = c("p1"),
+      time = as.Date("2020-01-01"),
+      sbp = 120,
+      stringsAsFactors = FALSE
+    )
+  )
+  ctx <- list(time = list(unit = "weeks", origin = as.Date("1970-01-01"), zone = "UTC"))
+
+  expect_error(
+    build_obs_grid(
+      vars = vars,
+      times = c(0, 1),
+      t0 = as.Date("2020-01-01"),
+      ctx = ctx,
+      time_spec = fluxCore::time_spec(unit = "days")
+    ),
+    "conflicts with time metadata in `ctx`"
+  )
 })
 
 test_that("events summarization works", {
@@ -76,7 +99,7 @@ test_that("death_date and last_contact_date create alive_mask NA after follow-up
       stringsAsFactors = FALSE
     )
   )
-  obj <- build_obs_grid(vars, times = c(0, 1, 2), t0 = as.Date("2020-01-01"), time_unit = "days")
+  obj <- build_obs_grid(vars, times = c(0, 1, 2), t0 = as.Date("2020-01-01"), time_spec = fluxCore::time_spec(unit = "days"))
   am <- obj$alive_mask["p1", ]
   fu <- obj$followup_defined["p1", ]
   expect_identical(as.logical(am[1]), TRUE)

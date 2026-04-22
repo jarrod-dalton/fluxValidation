@@ -13,7 +13,7 @@ build_obs_grid(
   t0,
   start_time = 0,
   ctx = NULL,
-  time_unit = NULL,
+  time_spec = NULL,
   schema = NULL,
   default_window = 0,
   window = NULL,
@@ -37,9 +37,9 @@ build_obs_grid(
 
 \item{start_time}{Numeric offset applied to \code{times} before adding to \code{t0}.}
 
-\item{ctx}{Optional context list. If provided, calendar time (Date/POSIXct) inputs are converted to numeric model time using \code{ctx$time$unit} (required) and optional \code{ctx$time$origin} / \code{ctx$time$zone}.}
+\item{ctx}{Optional context list. Compatibility path for time metadata via \code{ctx$time} or \code{ctx$time_spec}.}
 
-\item{time_unit}{Legacy unit string used when \code{ctx} is not provided. Prefer specifying \code{ctx$time$unit}.}
+\item{time_spec}{Optional compiled \code{fluxCore::time_spec()} object used for calendar-to-model-time conversion.}
 
 \item{schema}{Optional fluxCore schema used to expand grouped window settings.}
 

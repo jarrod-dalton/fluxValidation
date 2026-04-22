@@ -8,7 +8,7 @@ build_obs_grid <- function(
   t0,
   start_time = 0,
   ctx = NULL,
-  time_unit = NULL,
+  time_spec = NULL,
   schema = NULL,
   default_window = 0,
   window = NULL,
@@ -27,16 +27,9 @@ build_obs_grid <- function(
   if (is.unsorted(times, strictly = FALSE)) stop("`times` must be non-decreasing.", call. = FALSE)
   if (!is.numeric(start_time) || length(start_time) != 1L) stop("`start_time` must be scalar numeric.", call. = FALSE)
 
-  # Compile time mapping spec once (fast path for repeated conversions).
-  # If calendar times are used (Date/POSIXct), you must supply either:
-  #   - ctx with ctx$time$unit (and optional ctx$time$origin/zone), or
-  #   - time_unit (legacy arg) which will be wrapped into ctx$time$unit.
-  time_spec <- NULL
-  if (!is.null(ctx)) {
-    time_spec <- fluxCore::time_spec(ctx)
-  } else if (!is.null(time_unit) && nzchar(time_unit)) {
-    time_spec <- fluxCore::time_spec(list(time = list(unit = time_unit)))
-  }
+  # Compile/resolve time mapping once (fast path for repeated conversions).
+  # Preferred input is `time_spec`; `ctx$time` is a compatibility path.
+  time_spec <- .resolve_time_spec(ctx = ctx, time_spec = time_spec)
 
   parsed <- .parse_vars_tables(vars, id_col = id_col, time_col = time_col, time_spec = time_spec)
   entity_ids <- parsed$entity_ids
@@ -47,7 +40,7 @@ build_obs_grid <- function(
   grid_kind <- .time_kind(t0_vec[[1]])
   if (grid_kind %in% c("Date", "POSIXct")) {
     if (is.null(time_spec)) {
-      stop("For Date/POSIXct `t0`, supply `ctx` with ctx$time$unit (and optional ctx$time$origin/zone) or provide `time_unit`.", call. = FALSE)
+      stop("For Date/POSIXct `t0`, provide `time_spec` (preferred) or `ctx$time` compatibility fields.", call. = FALSE)
     }
   }
 
@@ -112,7 +105,7 @@ obj <- list(
     entity_ids = entity_ids,
     times = times,
     start_time = start_time,
-    time_unit = if (!is.null(time_spec)) time_spec$unit else time_unit,
+    time_spec = time_spec,
     t0 = t0_vec,
     grid_time = grid_time,
     # vars: sparse per-entity series (raw input after parsing)
@@ -142,6 +135,37 @@ print.flux_obs_grid <- function(x, ...) {
 }
 
 .assert <- function(cond, msg) { if (!isTRUE(cond)) stop(msg, call. = FALSE) }
+
+.same_time_spec <- function(a, b) {
+  if (is.null(a) || is.null(b)) return(FALSE)
+  if (!inherits(a, "time_spec") || !inherits(b, "time_spec")) return(FALSE)
+  identical(a$unit, b$unit) &&
+    identical(a$zone, b$zone) &&
+    identical(a$origin_class, b$origin_class) &&
+    isTRUE(all.equal(as.numeric(a$origin_posix), as.numeric(b$origin_posix), tolerance = 0))
+}
+
+.resolve_time_spec <- function(ctx, time_spec) {
+  if (!is.null(ctx) && !is.list(ctx)) stop("`ctx` must be a list or NULL.", call. = FALSE)
+  if (!is.null(time_spec) && !inherits(time_spec, "time_spec")) {
+    stop("`time_spec` must be a fluxCore `time_spec` object or NULL.", call. = FALSE)
+  }
+  if (is.null(ctx)) return(time_spec)
+
+  ts_ctx <- NULL
+  if (!is.null(ctx$time_spec) && inherits(ctx$time_spec, "time_spec")) {
+    ts_ctx <- ctx$time_spec
+  } else if (!is.null(ctx$time) && is.list(ctx$time)) {
+    ts_ctx <- fluxCore::time_spec(ctx = list(time = ctx$time))
+  }
+
+  if (is.null(ts_ctx)) return(time_spec)
+  if (is.null(time_spec)) return(ts_ctx)
+  if (!.same_time_spec(time_spec, ts_ctx)) {
+    stop("`time_spec` conflicts with time metadata in `ctx`.", call. = FALSE)
+  }
+  time_spec
+}
 
 .time_kind <- function(t) {
   if (inherits(t, "Date")) return("Date")
@@ -187,7 +211,7 @@ print.flux_obs_grid <- function(x, ...) {
       if (is.null(time_spec)) {
         kind_tt <- .time_kind(tt[which(!is.na(tt))[1]])
         if (kind_tt %in% c("Date", "POSIXct")) {
-          stop("Calendar times in `vars` require a time spec. Supply `ctx` with ctx$time$unit (and optional ctx$time$origin/zone) or provide `time_unit`.", call. = FALSE)
+          stop("Calendar times in `vars` require `time_spec` (preferred) or `ctx$time` compatibility fields.", call. = FALSE)
         }
       } else {
         tt <- fluxCore::time_to_model(tt, time_spec)
@@ -235,7 +259,7 @@ print.flux_obs_grid <- function(x, ...) {
     t0 <- t0_vec[[pid]]
     kind <- .time_kind(t0)
     if (kind != "numeric" && is.null(time_spec)) {
-      stop("Calendar times require a time spec. Supply `ctx` with ctx$time$unit (and optional ctx$time$origin/zone) or provide `time_unit`.", call. = FALSE)
+      stop("Calendar times require `time_spec` (preferred) or `ctx$time` compatibility fields.", call. = FALSE)
     }
     t0_num <- if (kind == "numeric") {
       as.numeric(t0)
@@ -447,7 +471,7 @@ print.flux_obs_grid <- function(x, ...) {
       if (is.null(time_spec)) {
         kind_tt <- .time_kind(tt[which(!is.na(tt))[1]])
         if (kind_tt %in% c("Date", "POSIXct")) {
-          stop("Calendar times in `events` require a time spec. Supply `ctx` with ctx$time$unit (and optional ctx$time$origin/zone) or provide `time_unit`.", call. = FALSE)
+          stop("Calendar times in `events` require `time_spec` (preferred) or `ctx$time` compatibility fields.", call. = FALSE)
         }
       } else {
         tt <- fluxCore::time_to_model(tt, time_spec)
