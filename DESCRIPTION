@@ -1,7 +1,7 @@
 Package: fluxValidation
 Type: Package
 Title: Validation tools for flux simulations
-Version: 1.5.1
+Version: 1.7.0
 Author: Jarrod Dalton [aut, cre]
 Maintainer: Jarrod Dalton <daltonj@ccf.org>
 Authors@R: person(given = "Jarrod",
@@ -13,11 +13,11 @@ License: LGPL-3
 Encoding: UTF-8
 LazyData: true
 Imports:
-    fluxCore (>= 1.5.1),
+    fluxCore (>= 1.7.0),
     stats
 Suggests:
     testthat,
-    fluxForecast (>= 1.5.1),
+    fluxForecast (>= 1.7.0),
     knitr,
     rmarkdown
 VignetteBuilder: knitr

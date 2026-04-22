@@ -1,3 +1,10 @@
+## 1.7.0
+
+- Coordinated ecosystem release alignment to version 1.7.0.
+- Dependency floors updated to `fluxCore (>= 1.7.0)` and
+  `fluxForecast (>= 1.7.0)`.
+- No additional functional changes beyond the 1.5.1 canonical-time updates.
+
 ## 1.5.1
 
 - Updated `build_obs_grid()` to use canonical `time_spec` object inputs
