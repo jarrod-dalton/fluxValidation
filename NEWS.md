@@ -3,10 +3,10 @@
 - Coordinated ecosystem release alignment to version 1.10.0.
 - Dependency floors updated to `fluxCore (>= 1.10.0)` and `fluxForecast (>= 1.10.0)`.
 
-## 1.9.0
+## 1.10.0
 
-- Coordinated ecosystem release alignment to version 1.9.0.
-- Dependency floors updated to `fluxCore (>= 1.9.0)` and `fluxForecast (>= 1.9.0)`.
+- Coordinated ecosystem release alignment to version 1.10.0.
+- Dependency floors updated to `fluxCore (>= 1.10.0)` and `fluxForecast (>= 1.10.0)`.
 
 ## 1.8.0
 
