@@ -51,6 +51,27 @@
   do.call(rbind, out)
 }
 
+#' Validate categorical/binary state variables against predicted level probabilities
+#'
+#' `validate_state_prob()` compares observed, grid-aligned state values from a
+#' `flux_obs_grid` to predicted level probabilities supplied as a `flux_state_prob`
+#' summary object (or a compatible list). Denominators are computed from explicit
+#' masks, not from missing values.
+#'
+#' @param pred A `flux_state_prob` summary (preferred) or a list with `$spec`
+#'   and `$result`.
+#' @param obs A `flux_obs_grid` produced by `build_obs_grid()`. Must include
+#'   `obs$state[[var]]`.
+#' @param var Variable name to validate (schema naming convention).
+#' @param times Optional numeric vector of times to validate. Defaults to
+#'   `pred$spec$times`.
+#' @param start_time Optional scalar reference time. Defaults to
+#'   `pred$spec$start_time`.
+#' @param measured_only If `TRUE`, restrict denominators to measured cells using
+#'   `obs$measured[[var]]`.
+#'
+#' @return A list with `predicted`, `observed`, and `meta`.
+#' @export
 validate_state_prob <- function(
   pred,
   obs,

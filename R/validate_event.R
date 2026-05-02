@@ -2,6 +2,30 @@
 # Event validation (MVP): observed cumulative incidence vs predicted risk curves
 # ------------------------------------------------------------------------------
 
+#' Validate event risk curves against observed gridded data
+#'
+#' Compare predicted cumulative event risk curves (from [fluxForecast::event_prob()])
+#' to observed cumulative incidence computed from a `flux_obs_grid`.
+#'
+#' @param pred A `flux_forecast` or `flux_event_prob` (preferred) object
+#'   (from fluxForecast).
+#' @param obs A `flux_obs_grid` object (from `build_obs_grid()`).
+#' @param event Character scalar event type to validate.
+#' @param start_time Optional scalar start time defining the eligible cohort.
+#'   Must be one of `pred$times`. Defaults to `pred$start_time` for
+#'   `flux_event_prob` or `pred$time0` for `flux_forecast`.
+#' @param times Optional numeric subset of `pred$times` at which to evaluate risk.
+#'   Defaults to all.
+#' @param obs_mode Observed risk estimand. `"policy"` fixes the denominator at
+#'   `start_time` (Forecast-compatible). `"interval"` uses interval-specific
+#'   risk sets via `at_risk`.
+#'
+#' @return A list with components `predicted`, `observed`, and `meta`.
+#' @details
+#' Observed risk curves are computed via `compute_obs_risk()` on the same `times` grid.
+#' The default `obs_mode = "policy"` matches the fixed-cohort estimand used by
+#' [fluxForecast::event_prob()].
+#' @export
 validate_event_risk <- function(
   pred,
   obs,

@@ -1,5 +1,44 @@
 
-# Hand-written docs (no roxygen).
+#' Align observed entity data to a forecast grid
+#'
+#' Align observed/test-set entity data to a forecast evaluation grid.
+#'
+#' @param vars A non-empty list of data.frames. Each data.frame must contain
+#'   `entity_id` and optionally `time`. If `time` is absent, all non-id columns
+#'   are treated as always-defined variables. If `time` is present, all non-id/time
+#'   columns are treated as longitudinal measurements. Duplicate variable names
+#'   across tables error in v0.0.2.
+#' @param events Optional data.frame with `entity_id`, `event_time`, and `event_type`.
+#' @param times Numeric vector of non-decreasing offsets defining the evaluation grid
+#'   (relative to entity-specific t0).
+#' @param t0 A scalar (applied to all entities) or a function returning a per-entity
+#'   anchor time (numeric, Date, or POSIXct).
+#' @param start_time Numeric offset applied to `times` before adding to `t0`.
+#' @param ctx Optional context list. Compatibility path for time metadata via
+#'   `ctx$time` or `ctx$time_spec`.
+#' @param time_spec Optional compiled [fluxCore::time_spec()] object used for
+#'   calendar-to-model-time conversion.
+#' @param schema Optional fluxCore schema used to expand grouped window settings.
+#' @param default_window Default LOCF window for gridding observed state.
+#' @param window Optional named per-variable (or group) window overrides.
+#' @param id_col Entity id column name.
+#' @param time_col Time column name for vars tables.
+#' @param event_time_col Time column name for events table.
+#' @param event_type_col Event type column name for events table.
+#' @param measure_lookback Non-negative lookback window for measuredness. Default 0
+#'   means exact match.
+#' @param model_defined Optional named list of logical matrices indicating model-defined
+#'   cells by variable.
+#' @param at_risk Optional named list of logical interval masks for event risk sets.
+#'
+#' @return A `flux_obs_grid` object.
+#' @details
+#' This is v0.0.2: contracts first, metrics later.
+#'
+#' If `death_date` and/or `last_contact_date` are provided as always-defined
+#' variables, they are used to derive `alive_mask` (TRUE/FALSE/NA) and
+#' `followup_defined` (TRUE/FALSE) on the grid.
+#' @export
 
 build_obs_grid <- function(
   vars,
@@ -123,8 +162,17 @@ obj <- list(
   obj
 }
 
+#' Test for flux_obs_grid
+#'
+#' Return `TRUE` if object inherits from `flux_obs_grid`.
+#'
+#' @param x Object.
+#'
+#' @return Logical.
+#' @export
 is_obs_grid <- function(x) inherits(x, "flux_obs_grid")
 
+#' @noRd
 print.flux_obs_grid <- function(x, ...) {
   cat("<flux_obs_grid>\n")
   cat("  Patients:", length(x$entity_ids), "\n")
