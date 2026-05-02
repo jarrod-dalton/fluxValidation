@@ -15,6 +15,15 @@
   invisible(TRUE)
 }
 
+#' Coerce prediction input to an event-probability object
+#'
+#' Converts forecast inputs to an event-probability summary object for validation workflows.
+#'
+#' @param x Either a `flux_event_prob` (returned unchanged) or a `flux_forecast`.
+#' @param ... Passed to [fluxForecast::event_prob()] when `x` is a `flux_forecast`.
+#'
+#' @return A `flux_event_prob` object.
+#' @export
 as_event_prob <- function(x, ...) {
   if (inherits(x, "flux_event_prob")) return(x)
   if (inherits(x, "flux_forecast")) {
@@ -25,6 +34,19 @@ as_event_prob <- function(x, ...) {
   stop("x must be a flux_event_prob or flux_forecast.", call. = FALSE)
 }
 
+#' Coerce prediction input to a state-probability summary
+#'
+#' Converts forecast inputs to categorical/binary/ordinal state probability summaries for validation.
+#'
+#' @param x Either a `flux_state_prob` (returned unchanged) or a `flux_forecast`.
+#' @param var Variable name.
+#' @param times Optional subset of times.
+#' @param start_time Optional start time used to align estimands.
+#' @param by Grouping passed to [fluxForecast::state_summary()].
+#' @param categorical_max_levels Maximum levels forwarded to [fluxForecast::state_summary()].
+#'
+#' @return A `flux_state_prob` object.
+#' @export
 as_state_prob <- function(
   x,
   var,
@@ -80,6 +102,18 @@ as_state_prob <- function(
   new_state_prob(spec = spec, result = res)
 }
 
+#' Coerce prediction input to a state-point summary
+#'
+#' Converts forecast inputs to continuous-ish state point summaries for validation.
+#'
+#' @param x Either a `flux_state_point` (returned unchanged) or a `flux_forecast`.
+#' @param var Variable name.
+#' @param times Optional subset of times.
+#' @param start_time Optional start time used to align estimands.
+#' @param by Grouping passed to [fluxForecast::state_summary()].
+#'
+#' @return A `flux_state_point` object.
+#' @export
 as_state_point <- function(
   x,
   var,

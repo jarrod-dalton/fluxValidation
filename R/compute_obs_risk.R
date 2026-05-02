@@ -12,6 +12,22 @@
 # Both estimands rely on explicit masks, not NA values.
 # ------------------------------------------------------------------------------
 
+#' Compute observed event risk curves on a forecast grid
+#'
+#' Compute observed event risk curves from a `flux_obs_grid`. This is a low-level
+#' helper used by `validate_event_risk()`.
+#'
+#' @param obs A `flux_obs_grid`.
+#' @param event Character scalar event type.
+#' @param times Optional numeric subset of `obs$times`. Defaults to all.
+#' @param start_time Scalar reference time in `obs$times` at which to define the
+#'   eligible cohort.
+#' @param mode `"policy"` fixes the denominator at `start_time` (Forecast-compatible).
+#'   `"interval"` uses interval-specific risk sets via `obs$at_risk`.
+#' @param measured_only Reserved for future use; currently ignored for events.
+#'
+#' @return A data.frame with columns `time`, `n_eligible`, `n_events`, and `risk`.
+#' @export
 compute_obs_risk <- function(
   obs,
   event,
