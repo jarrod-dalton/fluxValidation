@@ -1,3 +1,9 @@
+## fluxValidation 1.11.0
+
+- Migrated documentation from manual `.Rd` files to inline roxygen2 comments.
+  `man/` and `NAMESPACE` are now generated artifacts; do not edit by hand.
+- No functional changes to the public API.
+
 ## 1.10.0
 
 - Coordinated ecosystem release alignment to version 1.10.0.

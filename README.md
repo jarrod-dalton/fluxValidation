@@ -75,6 +75,16 @@ obs <- build_obs_grid(
 - Use `validate_state_prob()` for binary/categorical/ordinal variables when you have predicted level probabilities.
 - Use `validate_state_point()` for numeric variables when you have predicted means (or point summaries).
 
+## Development
+
+`man/` and `NAMESPACE` are **generated** — do not edit them by hand.
+
+To regenerate after changing roxygen comments in `R/`:
+
+```r
+roxygen2::roxygenise(".")
+```
+
 ## License
 
 LGPL-3.
