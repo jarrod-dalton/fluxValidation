@@ -10,7 +10,7 @@ validate_event_risk(
   event,
   start_time = NULL,
   times = NULL,
-  obs_mode = c("policy", "interval")
+  obs_mode = c("fixed_cohort", "risk_set")
 )
 }
 \arguments{
@@ -28,8 +28,8 @@ Must be one of \code{pred$times}. Defaults to \code{pred$start_time} for
 \item{times}{Optional numeric subset of \code{pred$times} at which to evaluate risk.
 Defaults to all.}
 
-\item{obs_mode}{Observed risk estimand. \code{"policy"} fixes the denominator at
-\code{start_time} (Forecast-compatible). \code{"interval"} uses interval-specific
+\item{obs_mode}{Observed risk estimand. \code{"fixed_cohort"} fixes the denominator at
+\code{start_time} (Forecast-compatible). \code{"risk_set"} uses interval-specific
 risk sets via \code{at_risk}.}
 }
 \value{
@@ -41,6 +41,6 @@ to observed cumulative incidence computed from a \code{flux_obs_grid}.
 }
 \details{
 Observed risk curves are computed via \code{compute_obs_risk()} on the same \code{times} grid.
-The default \code{obs_mode = "policy"} matches the fixed-cohort estimand used by
+The default \code{obs_mode = "fixed_cohort"} matches the fixed-cohort estimand used by
 \code{\link[fluxForecast:event_prob]{fluxForecast::event_prob()}}.
 }

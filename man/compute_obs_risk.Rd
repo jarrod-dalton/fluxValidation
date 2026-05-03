@@ -9,7 +9,7 @@ compute_obs_risk(
   event,
   times = NULL,
   start_time,
-  mode = c("policy", "interval"),
+  mode = c("fixed_cohort", "risk_set"),
   measured_only = FALSE
 )
 }
@@ -23,8 +23,8 @@ compute_obs_risk(
 \item{start_time}{Scalar reference time in \code{obs$times} at which to define the
 eligible cohort.}
 
-\item{mode}{\code{"policy"} fixes the denominator at \code{start_time} (Forecast-compatible).
-\code{"interval"} uses interval-specific risk sets via \code{obs$at_risk}.}
+\item{mode}{\code{"fixed_cohort"} fixes the denominator at \code{start_time} (Forecast-compatible).
+\code{"risk_set"} uses interval-specific risk sets via \code{obs$at_risk}.}
 
 \item{measured_only}{Reserved for future use; currently ignored for events.}
 }

@@ -16,14 +16,14 @@
 #'   `flux_event_prob` or `pred$time0` for `flux_forecast`.
 #' @param times Optional numeric subset of `pred$times` at which to evaluate risk.
 #'   Defaults to all.
-#' @param obs_mode Observed risk estimand. `"policy"` fixes the denominator at
-#'   `start_time` (Forecast-compatible). `"interval"` uses interval-specific
+#' @param obs_mode Observed risk estimand. `"fixed_cohort"` fixes the denominator at
+#'   `start_time` (Forecast-compatible). `"risk_set"` uses interval-specific
 #'   risk sets via `at_risk`.
 #'
 #' @return A list with components `predicted`, `observed`, and `meta`.
 #' @details
 #' Observed risk curves are computed via `compute_obs_risk()` on the same `times` grid.
-#' The default `obs_mode = "policy"` matches the fixed-cohort estimand used by
+#' The default `obs_mode = "fixed_cohort"` matches the fixed-cohort estimand used by
 #' [fluxForecast::event_prob()].
 #' @export
 validate_event_risk <- function(
@@ -32,7 +32,7 @@ validate_event_risk <- function(
   event,
   start_time = NULL,
   times = NULL,
-  obs_mode = c("policy", "interval")
+  obs_mode = c("fixed_cohort", "risk_set")
 ) {
   obs_mode <- match.arg(obs_mode)
   if (!inherits(obs, "flux_obs_grid")) stop("obs must be a flux_obs_grid.", call. = FALSE)

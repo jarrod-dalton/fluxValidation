@@ -22,8 +22,8 @@
 #' @param times Optional numeric subset of `obs$times`. Defaults to all.
 #' @param start_time Scalar reference time in `obs$times` at which to define the
 #'   eligible cohort.
-#' @param mode `"policy"` fixes the denominator at `start_time` (Forecast-compatible).
-#'   `"interval"` uses interval-specific risk sets via `obs$at_risk`.
+#' @param mode `"fixed_cohort"` fixes the denominator at `start_time` (Forecast-compatible).
+#'   `"risk_set"` uses interval-specific risk sets via `obs$at_risk`.
 #' @param measured_only Reserved for future use; currently ignored for events.
 #'
 #' @return A data.frame with columns `time`, `n_eligible`, `n_events`, and `risk`.
@@ -33,7 +33,7 @@ compute_obs_risk <- function(
   event,
   times = NULL,
   start_time,
-  mode = c("policy", "interval"),
+  mode = c("fixed_cohort", "risk_set"),
   measured_only = FALSE
 ) {
   mode <- match.arg(mode)
@@ -53,13 +53,13 @@ compute_obs_risk <- function(
     stop(sprintf("Event type '%s' not found in obs events.", event), call. = FALSE)
   }
 
-  if (mode == "policy") {
-    return(.compute_obs_risk_policy(obs, event = event, times = times, start_time = start_time, measured_only = measured_only))
+  if (mode == "fixed_cohort") {
+    return(.compute_obs_risk_fixed_cohort(obs, event = event, times = times, start_time = start_time, measured_only = measured_only))
   }
-  .compute_obs_risk_interval(obs, event = event, times = times, start_time = start_time, measured_only = measured_only)
+  .compute_obs_risk_risk_set(obs, event = event, times = times, start_time = start_time, measured_only = measured_only)
 }
 
-.compute_obs_risk_policy <- function(obs, event, times, start_time, measured_only) {
+.compute_obs_risk_fixed_cohort <- function(obs, event, times, start_time, measured_only) {
   t_idx <- match(times, obs$times)
   t0_idx <- match(start_time, obs$times)
 
@@ -117,7 +117,7 @@ compute_obs_risk <- function(
   )
 }
 
-.compute_obs_risk_interval <- function(obs, event, times, start_time, measured_only) {
+.compute_obs_risk_risk_set <- function(obs, event, times, start_time, measured_only) {
   t_idx <- match(times, obs$times)
   t0_idx <- match(start_time, obs$times)
 
