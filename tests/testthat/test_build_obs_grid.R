@@ -50,7 +50,7 @@ test_that("build_obs_grid requires time_spec for calendar t0", {
   expect_true(is_obs_grid(obj))
 })
 
-test_that("build_obs_grid errors when time_spec conflicts with ctx time metadata", {
+test_that("build_obs_grid errors for invalid time_spec input type", {
   vars <- list(
     data.frame(
       entity_id = c("p1"),
@@ -59,17 +59,15 @@ test_that("build_obs_grid errors when time_spec conflicts with ctx time metadata
       stringsAsFactors = FALSE
     )
   )
-  ctx <- list(time = list(unit = "weeks", origin = as.Date("1970-01-01"), zone = "UTC"))
 
   expect_error(
     build_obs_grid(
       vars = vars,
       times = c(0, 1),
       t0 = as.Date("2020-01-01"),
-      ctx = ctx,
-      time_spec = fluxCore::time_spec(unit = "days")
+      time_spec = list(unit = "days")
     ),
-    "conflicts with time metadata in `ctx`"
+    "time_spec"
   )
 })
 

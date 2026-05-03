@@ -1,5 +1,5 @@
-test_that("build_obs_grid supports Date t0 and Date state times using ctx$time units (weeks/months/years)", {
-  ctx_weeks <- list(time = list(unit = "weeks", origin = as.Date("1970-01-01"), zone = "UTC"))
+test_that("build_obs_grid supports Date t0 and Date state times using time_spec units (weeks/months/years)", {
+  ts_weeks <- fluxCore::time_spec(unit = "weeks", origin = as.Date("1970-01-01"), zone = "UTC")
 
   vars <- list(
     data.frame(entity_id = c("p1","p1","p2"),
@@ -9,27 +9,27 @@ test_that("build_obs_grid supports Date t0 and Date state times using ctx$time u
   )
 
   g <- build_obs_grid(vars = vars, times = c(0, 1, 2), t0 = as.Date("2020-01-01"),
-                      start_time = 0, ctx = ctx_weeks)
+                      start_time = 0, time_spec = ts_weeks)
 
   expect_true(is.numeric(g$grid_time[["p1"]]))
   expect_equal(as.numeric(g$grid_time[["p1"]][2] - g$grid_time[["p1"]][1]), 1)
   expect_equal(as.numeric(g$grid_time[["p1"]][3] - g$grid_time[["p1"]][2]), 1)
 
-  ctx_months <- list(time = list(unit = "months", origin = as.Date("1970-01-01"), zone = "UTC"))
+  ts_months <- fluxCore::time_spec(unit = "months", origin = as.Date("1970-01-01"), zone = "UTC")
   g2 <- build_obs_grid(vars = vars, times = c(0, 1, 2), t0 = as.Date("2020-01-01"),
-                       start_time = 0, ctx = ctx_months)
+                       start_time = 0, time_spec = ts_months)
   expect_equal(as.numeric(g2$grid_time[["p1"]][2] - g2$grid_time[["p1"]][1]), 1)
 
-  ctx_years <- list(time = list(unit = "years", origin = as.Date("1970-01-01"), zone = "UTC"))
+  ts_years <- fluxCore::time_spec(unit = "years", origin = as.Date("1970-01-01"), zone = "UTC")
   g3 <- build_obs_grid(vars = vars, times = c(0, 1, 2), t0 = as.Date("2020-01-01"),
-                       start_time = 0, ctx = ctx_years)
+                       start_time = 0, time_spec = ts_years)
   expect_equal(as.numeric(g3$grid_time[["p1"]][2] - g3$grid_time[["p1"]][1]), 1)
 })
 
-test_that("build_obs_grid supports POSIXct t0 and POSIXct times via ctx$time (hours)", {
-  ctx <- list(time = list(unit = "hours",
-                          origin = as.POSIXct("1970-01-01 00:00:00", tz = "UTC"),
-                          zone = "UTC"))
+test_that("build_obs_grid supports POSIXct t0 and POSIXct times via time_spec (hours)", {
+  ts <- fluxCore::time_spec(unit = "hours",
+                            origin = as.POSIXct("1970-01-01 00:00:00", tz = "UTC"),
+                            zone = "UTC")
 
   vars <- list(
     data.frame(entity_id = c("p1","p1"),
@@ -39,12 +39,12 @@ test_that("build_obs_grid supports POSIXct t0 and POSIXct times via ctx$time (ho
   )
 
   g <- build_obs_grid(vars = vars, times = c(0, 1, 2), t0 = as.POSIXct("2020-01-01 00:00:00", tz = "UTC"),
-                      start_time = 0, ctx = ctx)
+                      start_time = 0, time_spec = ts)
 
   expect_equal(as.numeric(g$grid_time[["p1"]][2] - g$grid_time[["p1"]][1]), 1)
 })
 
-test_that("build_obs_grid errors for calendar t0 without ctx/time_spec and errors for invalid zone", {
+test_that("build_obs_grid errors for calendar t0 without time_spec and invalid time_spec type", {
   vars <- list(
     data.frame(entity_id = c("p1"),
                time = as.Date("2020-01-01"),
@@ -58,10 +58,8 @@ test_that("build_obs_grid errors for calendar t0 without ctx/time_spec and error
     fixed = TRUE
   )
 
-  bad_ctx <- list(time = list(unit = "days", origin = as.POSIXct("1970-01-01 00:00:00", tz = "UTC"), zone = "NOT_A_ZONE"))
   expect_error(
-    build_obs_grid(vars = vars, times = c(0, 1), t0 = as.Date("2020-01-01"), ctx = bad_ctx),
-    "time zone",
-    ignore.case = TRUE
+    build_obs_grid(vars = vars, times = c(0, 1), t0 = as.Date("2020-01-01"), time_spec = list(unit = "days")),
+    "time_spec"
   )
 })

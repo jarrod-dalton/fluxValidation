@@ -10,7 +10,6 @@ build_obs_grid(
   times,
   t0,
   start_time = 0,
-  ctx = NULL,
   time_spec = NULL,
   schema = NULL,
   default_window = 0,
@@ -40,9 +39,6 @@ across tables error in v0.0.2.}
 anchor time (numeric, Date, or POSIXct).}
 
 \item{start_time}{Numeric offset applied to \code{times} before adding to \code{t0}.}
-
-\item{ctx}{Optional context list. Compatibility path for time metadata via
-\code{ctx$time} or \code{ctx$time_spec}.}
 
 \item{time_spec}{Optional compiled \code{\link[fluxCore:time_spec]{fluxCore::time_spec()}} object used for
 calendar-to-model-time conversion.}
