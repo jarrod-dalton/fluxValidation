@@ -76,8 +76,7 @@ validate_event_risk <- function(
   # return per-group comparison.
   pr_res <- predicted$result
   # Identify potential group cols
-  if (!("event_prob" %in% names(pr_res)) && ("risk" %in% names(pr_res))) pr_res$event_prob <- pr_res$risk
-  group_cols <- setdiff(names(pr_res), c("time", "n_eligible", "n_events", "event_prob", "risk"))
+  group_cols <- setdiff(names(pr_res), c("time", "n_eligible", "n_events", "event_prob"))
   if (length(group_cols) == 0) {
     cmp <- merge(
       pr_res[, c("time", "n_eligible", "n_events", "event_prob"), drop = FALSE],
